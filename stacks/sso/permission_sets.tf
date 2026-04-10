@@ -17,16 +17,16 @@ locals {
   # S3 버킷 패턴 - 와일드카드 대신 명시적 버킷 지정
   s3_buckets = {
     dev = [
-      "arn:aws:s3:::goormgb-dev-*",
-      "arn:aws:s3:::goormgb-dev-*/*"
+      "arn:aws:s3:::playball-dev-*",
+      "arn:aws:s3:::playball-dev-*/*"
     ]
     staging = [
-      "arn:aws:s3:::goormgb-staging-*",
-      "arn:aws:s3:::goormgb-staging-*/*"
+      "arn:aws:s3:::playball-staging-*",
+      "arn:aws:s3:::playball-staging-*/*"
     ]
     prod = [
-      "arn:aws:s3:::goormgb-prod-*",
-      "arn:aws:s3:::goormgb-prod-*/*"
+      "arn:aws:s3:::playball-prod-*",
+      "arn:aws:s3:::playball-prod-*/*"
     ]
   }
 }
@@ -240,10 +240,10 @@ resource "aws_ssoadmin_permission_set_inline_policy" "developer" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::goormgb-assets",
-          "arn:aws:s3:::goormgb-assets/*",
-          "arn:aws:s3:::goormgb-backup/${each.key}/*",
-          "arn:aws:s3:::goormgb-backup",
+          "arn:aws:s3:::playball-assets",
+          "arn:aws:s3:::playball-assets/*",
+          "arn:aws:s3:::playball-backup/${each.key}/*",
+          "arn:aws:s3:::playball-backup",
         ]
       },
       {
@@ -511,8 +511,8 @@ resource "aws_ssoadmin_permission_set_inline_policy" "frontend" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::goormgb-assets",
-          "arn:aws:s3:::goormgb-assets/*"
+          "arn:aws:s3:::playball-assets",
+          "arn:aws:s3:::playball-assets/*"
         ]
       }
     ]

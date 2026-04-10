@@ -35,13 +35,13 @@ variable "geo_allow_only" {
 variable "rate_limit_global" {
   description = "IP당 5분 요청 한도 (전체)"
   type        = number
-  default     = 1500  # 분당 300
+  default     = 1500 # 분당 300
 }
 
 variable "rate_limit_auth" {
   description = "IP당 5분 요청 한도 (/auth/ 경로)"
   type        = number
-  default     = 50  # 분당 10
+  default     = 50 # 분당 10
 }
 
 variable "rate_limit_auth_path" {
@@ -79,7 +79,7 @@ variable "enable_sqli_ruleset" {
 variable "max_body_size" {
   description = "최대 허용 body 크기 (bytes). 0이면 비활성화"
   type        = number
-  default     = 8192  # 8KB
+  default     = 8192 # 8KB
 }
 
 #############################################

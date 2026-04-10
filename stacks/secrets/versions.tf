@@ -1,6 +1,6 @@
 #############################################
-# IAM Stack - Providers
-# 메인 계정(A)에서 실행
+# Secrets Stack - Terraform Configuration
+# 인프라 재생성과 무관한 고정 시크릿 관리
 #############################################
 
 terraform {
@@ -15,7 +15,7 @@ terraform {
 
   backend "s3" {
     bucket       = "playball-tf-state"
-    key          = "common/iam/terraform.tfstate"
+    key          = "common/secrets/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
@@ -29,7 +29,7 @@ provider "aws" {
     tags = {
       Project   = "goormgb"
       ManagedBy = "terraform"
-      Layer     = "common"
+      Layer     = "secrets"
     }
   }
 }

@@ -6,7 +6,7 @@
 #############################################
 
 locals {
-  name_prefix = "${var.owner_name}-${var.environment}"
+  name_prefix   = "${var.owner_name}-${var.environment}"
   function_name = "${local.name_prefix}-realtime-stats"
 }
 
@@ -21,7 +21,7 @@ resource "aws_kinesis_stream" "cloudfront_logs" {
     stream_mode = "ON_DEMAND"
   }
 
-  retention_period = 24  # 최소 (비용 절감)
+  retention_period = 24 # 최소 (비용 절감)
 
   tags = {
     Name        = "${local.name_prefix}-cf-realtime-logs"
@@ -35,7 +35,7 @@ resource "aws_kinesis_stream" "cloudfront_logs" {
 
 resource "aws_cloudfront_realtime_log_config" "main" {
   name          = "${local.name_prefix}-realtime-log"
-  sampling_rate = var.sampling_rate  # 100 = 100%
+  sampling_rate = var.sampling_rate # 100 = 100%
 
   fields = [
     "timestamp",
@@ -71,11 +71,11 @@ data "archive_file" "lambda" {
 
 # Lambda Layer (redis-py)
 resource "aws_lambda_layer_version" "redis" {
-  filename            = "${path.module}/layers/redis-layer.zip"
-  layer_name          = "${local.name_prefix}-redis-py"
-  compatible_runtimes       = ["python3.12"]
+  filename                 = "${path.module}/layers/redis-layer.zip"
+  layer_name               = "${local.name_prefix}-redis-py"
+  compatible_runtimes      = ["python3.12"]
   compatible_architectures = ["arm64"]
-  description         = "redis-py library for Lambda"
+  description              = "redis-py library for Lambda"
 }
 
 resource "aws_lambda_function" "realtime_stats" {
@@ -106,8 +106,8 @@ resource "aws_lambda_function" "realtime_stats" {
       ENVIRONMENT      = var.environment
       METRIC_NAMESPACE = "PlayBall/RealtimeStats"
       # 봇 탐지 임계치
-      BOT_REQ_THRESHOLD    = tostring(var.bot_req_threshold)
-      BOT_BLOCKLIST_TTL    = tostring(var.bot_blocklist_ttl)
+      BOT_REQ_THRESHOLD      = tostring(var.bot_req_threshold)
+      BOT_BLOCKLIST_TTL      = tostring(var.bot_blocklist_ttl)
       RATIO_SINGLE_IP_ATTACK = tostring(var.ratio_single_ip_attack)
       RATIO_BOTNET_ATTACK    = tostring(var.ratio_botnet_attack)
       MIN_REQUESTS_FOR_RATIO = tostring(var.min_requests_for_ratio)

@@ -4,10 +4,10 @@
 #############################################
 
 locals {
-  lambda_name                     = "${var.project_name}-security-event-discord"
-  rule_name                       = "${var.project_name}-security-critical-events"
-  unauthorized_rule_name          = "${var.project_name}-security-unauthorized-api-calls"
-  enable_unauthorized_api_alerts  = false
+  lambda_name                    = "${var.project_name}-security-event-discord"
+  rule_name                      = "${var.project_name}-security-critical-events"
+  unauthorized_rule_name         = "${var.project_name}-security-unauthorized-api-calls"
+  enable_unauthorized_api_alerts = false
 }
 
 data "archive_file" "lambda" {

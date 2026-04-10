@@ -918,8 +918,8 @@ resource "aws_iam_policy" "rds_backup" {
           "s3:DeleteObject"
         ]
         Resource = [
-          "arn:aws:s3:::goormgb-backup",
-          "arn:aws:s3:::goormgb-backup/${var.environment}/postgres/*"
+          "arn:aws:s3:::playball-backup",
+          "arn:aws:s3:::playball-backup/${var.environment}/postgres/*"
         ]
       }
     ]
@@ -973,8 +973,8 @@ resource "aws_iam_policy" "ai_defense" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::goormgb-staging-ai-audit",
-          "arn:aws:s3:::goormgb-staging-ai-audit/*"
+          "arn:aws:s3:::playball-staging-ai-audit",
+          "arn:aws:s3:::playball-staging-ai-audit/*"
         ]
       }
     ]

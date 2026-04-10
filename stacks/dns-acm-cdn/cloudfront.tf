@@ -1,6 +1,6 @@
 #############################################
 # CloudFront - Assets CDN (공통)
-# assets.playball.one → S3 goormgb-assets
+# assets.playball.one → S3 playball-assets
 #############################################
 
 data "aws_caller_identity" "current" {}
@@ -10,7 +10,7 @@ resource "aws_cloudfront_origin_access_control" "assets" {
   count = var.enable_acm ? 1 : 0
 
   name                              = "assets-oac"
-  description                       = "OAC for goormgb-assets S3 bucket"
+  description                       = "OAC for playball-assets S3 bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -19,7 +19,7 @@ resource "aws_cloudfront_origin_access_control" "assets" {
 # S3 Bucket Policy - CloudFront 접근 허용 (static 경로만)
 resource "aws_s3_bucket_policy" "assets" {
   count  = var.enable_acm ? 1 : 0
-  bucket = "goormgb-assets"
+  bucket = "playball-assets"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -32,7 +32,7 @@ resource "aws_s3_bucket_policy" "assets" {
         }
         Action = "s3:GetObject"
         Resource = [
-          "arn:aws:s3:::goormgb-assets/static/*"
+          "arn:aws:s3:::playball-assets/static/*"
         ]
         Condition = {
           StringEquals = {
@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "assets" {
   default_root_object = "index.html"
 
   origin {
-    domain_name              = "goormgb-assets.s3.ap-northeast-2.amazonaws.com"
+    domain_name              = "playball-assets.s3.ap-northeast-2.amazonaws.com"
     origin_id                = "s3-assets"
     origin_access_control_id = aws_cloudfront_origin_access_control.assets[0].id
   }

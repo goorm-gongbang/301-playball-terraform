@@ -1,6 +1,7 @@
 #############################################
-# DNS / ACM / CDN 공통 관리
-# playball.one 루트 도메인
+# Observability S3 & Lifecycle Stack
+# - Loki / Tempo / Thanos S3 buckets (staging + prod)
+# - S3 lifecycle policies (expiration, GLACIER transition)
 #############################################
 
 terraform {
@@ -15,7 +16,7 @@ terraform {
 
   backend "s3" {
     bucket       = "playball-tf-state"
-    key          = "dns/root/terraform.tfstate"
+    key          = "common/obs-s3-lifecycle/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
@@ -29,21 +30,7 @@ provider "aws" {
     tags = {
       Project   = "goormgb"
       ManagedBy = "terraform"
-      Layer     = "dns"
-    }
-  }
-}
-
-# CloudFront ACM은 us-east-1 필수
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-
-  default_tags {
-    tags = {
-      Project   = "goormgb"
-      ManagedBy = "terraform"
-      Layer     = "dns"
+      Layer     = "observability"
     }
   }
 }

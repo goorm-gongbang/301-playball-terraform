@@ -66,7 +66,7 @@ variable "discord_secret_name" {
 variable "discord_username" {
   description = "Discord bot username"
   type        = string
-  default     = "goormgb-security-bot"
+  default     = "playball-security-bot"
 }
 
 variable "discord_critical_webhook_key" {

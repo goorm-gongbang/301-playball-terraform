@@ -1,5 +1,9 @@
 #############################################
-# Common Environment - Terraform Configuration
+# S3 Audit & Security Stack
+# - audit-logs S3 bucket (CloudTrail log storage)
+# - CloudTrail (management + S3 data events)
+# - Security Events (EventBridge → Lambda → Discord)
+# - Audit Events (S3 delete detection → Lambda → Discord)
 #############################################
 
 terraform {
@@ -18,32 +22,21 @@ terraform {
 
   backend "s3" {
     bucket       = "playball-tf-state"
-    key          = "common/terraform.tfstate"
+    key          = "common/s3-audit-security/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
   }
 }
 
-#############################################
-# Load YAML Configuration
-#############################################
-
-locals {
-  config = yamldecode(file("${path.module}/config.yaml"))
-}
-
-#############################################
-# AWS Provider
-#############################################
-
 provider "aws" {
-  region = local.config.aws_region
+  region = "ap-northeast-2"
 
   default_tags {
     tags = {
-      Project   = local.config.project_name
+      Project   = "goormgb"
       ManagedBy = "terraform"
+      Layer     = "audit-security"
     }
   }
 }

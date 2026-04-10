@@ -1,5 +1,5 @@
 #############################################
-# Staging Environment - Main Configuration
+# Prod Environment - Main Configuration
 #############################################
 
 locals {
@@ -7,6 +7,7 @@ locals {
   owner            = local.config.owner_name
   region           = local.config.aws_region
   eks_cluster_name = "${local.owner}-${local.env}-eks"
+  account_id       = data.aws_caller_identity.current.account_id
 }
 
 #############################################
@@ -105,9 +106,7 @@ module "elasticache" {
 
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-
-  # VPC CIDR 기반 규칙 (독립적으로 배포 가능)
-  vpc_cidr = local.config.vpc.cidr
+  vpc_cidr           = local.config.vpc.cidr
 
   redis_engine_version       = local.config.elasticache.engine_version
   node_type                  = local.config.elasticache.node_type
@@ -129,9 +128,7 @@ module "rds" {
 
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-
-  # VPC CIDR 기반 규칙 (독립적으로 배포 가능)
-  vpc_cidr = local.config.vpc.cidr
+  vpc_cidr           = local.config.vpc.cidr
 
   engine_version        = local.config.rds.engine_version
   instance_class        = local.config.rds.instance_class
@@ -140,14 +137,9 @@ module "rds" {
   multi_az              = local.config.rds.multi_az
   deletion_protection   = local.config.rds.deletion_protection
 
-  # CloudWatch Logs (Grafana 연동)
   enable_cloudwatch_logs = true
-
-  # Enhanced Monitoring (OS metrics)
-  monitoring_interval = lookup(local.config.rds, "monitoring_interval", 0)
-
-  # Connection pool size
-  max_connections = lookup(local.config.rds, "max_connections", 100)
+  monitoring_interval    = lookup(local.config.rds, "monitoring_interval", 0)
+  max_connections        = lookup(local.config.rds, "max_connections", 100)
 
   depends_on = [module.vpc]
 }
@@ -169,99 +161,6 @@ module "karpenter" {
 }
 
 #############################################
-# DNS Module (Route53 + ACM)
-#############################################
-
-module "dns" {
-  source = "../../modules/dns"
-
-  providers = {
-    aws           = aws
-    aws.us_east_1 = aws.us_east_1
-  }
-
-  environment  = local.env
-  domain_name  = "playball.one"
-  vercel_ip    = "76.76.21.21"
-  vercel_cname = "912cfcafdeccf2b2.vercel-dns-017.com"
-}
-
-#############################################
-# CDN Module (CloudFront + WAF + ALB SG)
-#############################################
-
-module "cdn" {
-  source = "../../modules/cdn"
-
-  providers = {
-    aws           = aws
-    aws.us_east_1 = aws.us_east_1
-  }
-
-  environment = local.env
-  domain      = "api.${local.env}.playball.one"
-
-  # CloudFront origin
-  alb_dns             = local.config.cdn.alb_dns
-  acm_certificate_arn = module.dns.acm_cloudfront_arn
-
-  # Route53
-  route53_zone_id     = module.dns.zone_id
-  route53_record_name = "api"
-
-  # ALB SG (태그 기반 자동 발견)
-  eks_cluster_name  = module.eks.cluster_name
-  alb_ingress_stack = "${local.env}-alb"
-  admin_allowed_ips = local.config.cdn.admin_allowed_ips
-
-  # WAF (코드 준비됨, 필요 시 true로 변경)
-  enable_waf             = false
-  waf_geo_allow_only     = ["KR"]
-  waf_rate_limit_global  = 1500
-  waf_rate_limit_auth    = 50
-  waf_max_body_size      = 8192
-  waf_exclude_paths      = ["/load-test/"]
-  waf_enable_bot_control = false
-  waf_enable_atp         = false
-
-  depends_on = [module.dns, module.eks]
-}
-
-# #############################################
-# # Realtime Stats (1주 한정)
-# # Lambda Layer 빌드 후 주석 해제: modules/realtime-stats/layers/build.sh
-# #############################################
-#
-# module "realtime_stats" {
-#   count  = local.config.realtime_stats.enabled ? 1 : 0
-#   source = "../../modules/realtime-stats"
-#
-#   environment = local.env
-#   owner_name  = local.owner
-#
-#   vpc_id             = module.vpc.vpc_id
-#   vpc_cidr           = local.config.vpc.cidr
-#   private_subnet_ids = module.vpc.private_subnet_ids
-#
-#   redis_host              = module.elasticache.redis_endpoint
-#   redis_port              = 6379
-#   redis_tls               = lookup(local.config.elasticache, "transit_encryption", false)
-#   redis_security_group_id = module.elasticache.security_group_id
-#
-#   cloudfront_distribution_id = module.cdn.cloudfront_id
-#   sampling_rate              = local.config.realtime_stats.sampling_rate
-#
-#   # 봇 탐지 / ratio 분석 임계치
-#   bot_req_threshold      = lookup(local.config.realtime_stats, "bot_req_threshold", 200)
-#   bot_blocklist_ttl      = lookup(local.config.realtime_stats, "bot_blocklist_ttl", 3600)
-#   ratio_single_ip_attack = lookup(local.config.realtime_stats, "ratio_single_ip_attack", 50)
-#   ratio_botnet_attack    = lookup(local.config.realtime_stats, "ratio_botnet_attack", 1.2)
-#   min_requests_for_ratio = lookup(local.config.realtime_stats, "min_requests_for_ratio", 500)
-#
-#   depends_on = [module.cdn, module.elasticache]
-# }
-
-#############################################
 # Ops Alerting (CloudWatch → Discord)
 #############################################
 
@@ -271,13 +170,13 @@ module "ops_alerting" {
   environment = local.env
   owner_name  = local.owner
   aws_region  = local.region
-  account_id  = data.aws_caller_identity.current.account_id
+  account_id  = local.account_id
 
   discord_secret_name   = "${local.env}/monitoring/discord-webhook-alerts"
   critical_mention_text = "@개발팀 @admins"
 
   redis_cache_cluster_id = "${local.owner}-${local.env}-redis-001"
-  alarms_enabled         = lookup(local.config, "ops_alerting_enabled", true)
+  alarms_enabled         = true
 
   rds_instance_identifier = module.rds.identifier
   backup_s3_bucket        = "playball-backup"
@@ -299,12 +198,23 @@ module "observability_irsa" {
   oidc_provider     = module.eks.oidc_provider
 
   s3_bucket_names = [
-    "playball-staging-loki",
-    "playball-staging-tempo",
-    "playball-staging-thanos"
+    "playball-prod-loki",
+    "playball-prod-tempo",
+    "playball-prod-thanos"
   ]
 
   depends_on = [module.eks]
+}
+
+#############################################
+# Domain & ACM (Fetched from Common)
+#############################################
+
+data "aws_acm_certificate" "common" {
+  domain      = local.config.domain
+  types       = ["AMAZON_ISSUED"]
+  most_recent = true
+  statuses    = ["ISSUED"]
 }
 
 #############################################
@@ -314,11 +224,14 @@ module "observability_irsa" {
 
 locals {
   dynamic_secrets = {
-    "staging/ai-service/redis" = {
-      description = "Redis connection for AI Defense session storage"
+    "prod/ai-service/postgres" = {
+      description = "PostgreSQL connection for AI Defense policy control-plane (prod)"
     }
-    "staging/ai-service/postgres" = {
-      description = "PostgreSQL connection for AI Defense policy control-plane"
+    "prod/ai-service/redis" = {
+      description = "Redis connection for AI Defense session storage (prod)"
+    }
+    "prod/services/redis" = {
+      description = "Redis connection credentials (prod)"
     }
   }
 }
@@ -331,7 +244,7 @@ resource "aws_secretsmanager_secret" "dynamic" {
 
   tags = {
     Name        = each.key
-    Environment = "staging"
+    Environment = "prod"
     Type        = "dynamic"
   }
 
@@ -340,8 +253,21 @@ resource "aws_secretsmanager_secret" "dynamic" {
   }
 }
 
+resource "aws_secretsmanager_secret_version" "ai_postgres" {
+  secret_id = aws_secretsmanager_secret.dynamic["prod/ai-service/postgres"].id
+  secret_string = jsonencode({
+    host     = module.rds.address
+    port     = "5432"
+    username = module.rds.username
+    password = "CHANGE_ME_IN_CONSOLE"
+    dbname   = "ai_defense"
+  })
+
+  lifecycle { ignore_changes = [secret_string] }
+}
+
 resource "aws_secretsmanager_secret_version" "ai_redis" {
-  secret_id = aws_secretsmanager_secret.dynamic["staging/ai-service/redis"].id
+  secret_id = aws_secretsmanager_secret.dynamic["prod/ai-service/redis"].id
   secret_string = jsonencode({
     host = module.elasticache.redis_endpoint
     port = "6379"
@@ -350,14 +276,11 @@ resource "aws_secretsmanager_secret_version" "ai_redis" {
   lifecycle { ignore_changes = [secret_string] }
 }
 
-resource "aws_secretsmanager_secret_version" "ai_postgres" {
-  secret_id = aws_secretsmanager_secret.dynamic["staging/ai-service/postgres"].id
+resource "aws_secretsmanager_secret_version" "redis" {
+  secret_id = aws_secretsmanager_secret.dynamic["prod/services/redis"].id
   secret_string = jsonencode({
-    host     = module.rds.address
-    port     = "5432"
-    username = "ai_defense"
-    password = "CHANGE_ME_IN_CONSOLE"
-    dbname   = "ai_defense"
+    host = module.elasticache.redis_endpoint
+    port = "6379"
   })
 
   lifecycle { ignore_changes = [secret_string] }

@@ -78,7 +78,7 @@ variable "rds_instance_identifier" {
 variable "backup_s3_bucket" {
   description = "보조 백업 S3 bucket"
   type        = string
-  default     = "goormgb-backup"
+  default     = "playball-backup"
 }
 
 variable "backup_check_schedule" {
