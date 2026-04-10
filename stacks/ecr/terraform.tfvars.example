@@ -1,0 +1,16 @@
+#############################################
+# common/ecr - terraform.tfvars.example
+#############################################
+
+# Cross-account access for other AWS accounts
+cross_account_node_roles = {
+  # stagingb (테스트 계정 B)
+  "274130523831" = [
+    "ktcloud_team4_260204-karpenter-node"
+  ]
+
+  # prod (프로덕션 계정 C) - 추가 시
+  # "123456789012" = [
+  #   "prod-karpenter-node"
+  # ]
+}
