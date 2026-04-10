@@ -5,7 +5,7 @@
 variable "domain_name" {
   description = "Root domain name"
   type        = string
-  default     = "playball.one"
+  default     = "goormgb.help"
 }
 
 variable "enable_acm" {
@@ -15,25 +15,25 @@ variable "enable_acm" {
 }
 
 variable "staging_zone_name_servers" {
-  description = "Name servers for staging.playball.one zone (dns/staging에서 output 복사)"
+  description = "Name servers for staging.goormgb.help zone (dns/staging에서 output 복사)"
   type        = list(string)
   default     = []
 }
 
 variable "prod_zone_name_servers" {
-  description = "Name servers for prod.playball.one zone"
+  description = "Name servers for prod.goormgb.help zone"
   type        = list(string)
   default     = []
 }
 
 variable "pentest_zone_name_servers" {
-  description = "Name servers for pentest.playball.one zone (306-pen-testing에서 output 복사)"
+  description = "Name servers for pentest.goormgb.help zone (306-pen-testing에서 output 복사)"
   type        = list(string)
   default     = []
 }
 
 variable "loadtest_zone_name_servers" {
-  description = "Name servers for loadtest.playball.one zone (305-k6-operators에서 output 복사)"
+  description = "Name servers for loadtest.goormgb.help zone (305-k6-operators에서 output 복사)"
   type        = list(string)
   default     = []
 }

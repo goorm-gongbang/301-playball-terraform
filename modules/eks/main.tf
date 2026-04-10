@@ -278,7 +278,7 @@ resource "aws_eks_node_group" "infra" {
 
   ami_type       = "AL2023_ARM_64_STANDARD"
   instance_types = var.infra_instance_types
-  capacity_type  = "ON_DEMAND"
+  capacity_type  = var.infra_capacity_type
 
   launch_template {
     id      = aws_launch_template.infra.id
@@ -393,7 +393,7 @@ resource "aws_eks_node_group" "monitoring" {
 
   ami_type       = "AL2023_ARM_64_STANDARD"
   instance_types = var.monitoring_instance_types
-  capacity_type  = "SPOT"
+  capacity_type  = var.monitoring_capacity_type
 
   launch_template {
     id      = aws_launch_template.monitoring.id
@@ -918,8 +918,8 @@ resource "aws_iam_policy" "rds_backup" {
           "s3:DeleteObject"
         ]
         Resource = [
-          "arn:aws:s3:::playball-backup",
-          "arn:aws:s3:::playball-backup/${var.environment}/postgres/*"
+          "arn:aws:s3:::playball-web-backup",
+          "arn:aws:s3:::playball-web-backup/${var.environment}/postgres/*"
         ]
       }
     ]

@@ -242,8 +242,8 @@ resource "aws_ssoadmin_permission_set_inline_policy" "developer" {
         Resource = [
           "arn:aws:s3:::playball-assets",
           "arn:aws:s3:::playball-assets/*",
-          "arn:aws:s3:::playball-backup/${each.key}/*",
-          "arn:aws:s3:::playball-backup",
+          "arn:aws:s3:::playball-web-backup/${each.key}/*",
+          "arn:aws:s3:::playball-web-backup",
         ]
       },
       {

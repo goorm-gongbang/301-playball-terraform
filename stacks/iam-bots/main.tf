@@ -5,7 +5,7 @@
 locals {
   account_id    = data.aws_caller_identity.current.account_id
   aws_region    = "ap-northeast-2"
-  backup_bucket = "playball-backup"
+  backup_bucket = "playball-web-backup"
 }
 
 #############################################

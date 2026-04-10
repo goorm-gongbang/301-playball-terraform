@@ -36,8 +36,11 @@ variable "cross_account_ids" {
 variable "cross_account_node_roles" {
   description = "Map of account_id to list of node role names"
   type        = map(list(string))
-  default     = {}
-  # 예: {
-  #   "274130523831" = ["ktcloud_team4_260204-karpenter-node"]
-  # }
+  default = {
+    "406223549139" = [
+      "goormgb-staging-apps-node-role",
+      "goormgb-staging-infra-node-role",
+      "goormgb-staging-monitoring-node-role"
+    ]
+  }
 }

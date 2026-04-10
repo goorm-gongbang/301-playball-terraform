@@ -18,7 +18,7 @@ output "cloudfront_domain" {
 }
 
 output "api_url" {
-  description = "API URL (e.g. https://api.staging.playball.one)"
+  description = "API URL (e.g. https://api.staging.goormgb.help)"
   value       = "https://${var.domain}"
 }
 

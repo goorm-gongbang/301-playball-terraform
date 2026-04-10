@@ -1,9 +1,7 @@
 #############################################
 # S3 Stack
-# - backup (운영 백업, 환경별 lifecycle)
-# - archive (장기 보관, DEEP_ARCHIVE)
-# - ai-data (AI팀 데이터)
-# - ai-backup (AI팀 백업)
+# - playball-web-backup (DB 백업, 로그 백업, 환경별 lifecycle)
+# - playball-retention-archive (법적 장기 보관, DEEP_ARCHIVE)
 #############################################
 
 #############################################
@@ -11,8 +9,8 @@
 #############################################
 
 resource "aws_s3_bucket" "backup" {
-  bucket = "${var.project_name}-backup"
-  tags   = { Name = "${var.project_name}-backup", Purpose = "operations-backup" }
+  bucket = "playball-web-backup"
+  tags   = { Name = "playball-web-backup", Purpose = "db-logs-backup" }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "backup" {
@@ -78,8 +76,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "backup" {
 #############################################
 
 resource "aws_s3_bucket" "archive" {
-  bucket = "${var.project_name}-archive"
-  tags   = { Name = "${var.project_name}-archive", Purpose = "long-term-retention" }
+  bucket = "playball-retention-archive"
+  tags   = { Name = "playball-retention-archive", Purpose = "long-term-retention" }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "archive" {
@@ -154,56 +152,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "archive" {
   }
 }
 
-#############################################
-# AI Data Bucket
-#############################################
-
-resource "aws_s3_bucket" "ai_data" {
-  bucket = "${var.project_name}-ai-data"
-  tags   = { Name = "${var.project_name}-ai-data", Team = "AI" }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "ai_data" {
-  bucket = aws_s3_bucket.ai_data.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "ai_data" {
-  bucket                  = aws_s3_bucket.ai_data.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-#############################################
-# AI Backup Bucket
-#############################################
-
-resource "aws_s3_bucket" "ai_backup" {
-  bucket = "${var.project_name}-ai-backup"
-  tags   = { Name = "${var.project_name}-ai-backup", Team = "AI" }
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "ai_backup" {
-  bucket = aws_s3_bucket.ai_backup.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "ai_backup" {
-  bucket                  = aws_s3_bucket.ai_backup.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}

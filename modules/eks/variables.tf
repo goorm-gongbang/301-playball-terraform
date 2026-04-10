@@ -80,6 +80,12 @@ variable "monitoring_instance_types" {
   default     = ["t4g.xlarge"]
 }
 
+variable "monitoring_capacity_type" {
+  description = "Capacity type for monitoring node group (ON_DEMAND or SPOT)"
+  type        = string
+  default     = "ON_DEMAND"
+}
+
 variable "monitoring_min_size" {
   description = "Minimum size for monitoring node group"
   type        = number
@@ -106,6 +112,12 @@ variable "infra_instance_types" {
   description = "Instance types for infra node group"
   type        = list(string)
   default     = ["t4g.large"]
+}
+
+variable "infra_capacity_type" {
+  description = "Capacity type for infra node group (ON_DEMAND or SPOT)"
+  type        = string
+  default     = "ON_DEMAND"
 }
 
 variable "infra_min_size" {

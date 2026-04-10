@@ -107,30 +107,6 @@ output "ai_defense_irsa_role_arn" {
 }
 
 #############################################
-# Bastion
-#############################################
-
-output "bastion_instance_id" {
-  description = "Bastion instance ID"
-  value       = module.bastion.instance_id
-}
-
-output "bastion_private_ip" {
-  description = "Bastion private IP"
-  value       = module.bastion.private_ip
-}
-
-output "bastion_public_ip" {
-  description = "Bastion public IP"
-  value       = module.bastion.public_ip
-}
-
-output "bastion_ssm_command" {
-  description = "SSM command to connect to bastion"
-  value       = module.bastion.ssm_command
-}
-
-#############################################
 # ElastiCache (Redis)
 #############################################
 

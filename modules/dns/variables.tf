@@ -10,7 +10,7 @@ variable "environment" {
 variable "domain_name" {
   description = "Root domain name"
   type        = string
-  default     = "playball.one"
+  default     = "goormgb.help"
 }
 
 variable "vercel_ip" {

@@ -18,7 +18,7 @@ variable "owner_name" {
 #############################################
 
 variable "domain" {
-  description = "API 도메인 (e.g. api.staging.playball.one)"
+  description = "API 도메인 (e.g. api.staging.goormgb.help)"
   type        = string
 }
 

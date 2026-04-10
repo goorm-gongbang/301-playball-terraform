@@ -1,5 +1,5 @@
 #############################################
-# Route53 Hosted Zone - playball.one (루트)
+# Route53 Hosted Zone - goormgb.help (루트)
 #############################################
 
 resource "aws_route53_zone" "root" {
@@ -15,7 +15,7 @@ resource "aws_route53_zone" "root" {
 # NS Delegation - Subdomain Zones
 #############################################
 
-# staging.playball.one NS 위임
+# staging.goormgb.help NS 위임
 resource "aws_route53_record" "staging_ns" {
   count = length(var.staging_zone_name_servers) > 0 ? 1 : 0
 
@@ -26,7 +26,7 @@ resource "aws_route53_record" "staging_ns" {
   records = var.staging_zone_name_servers
 }
 
-# prod.playball.one NS 위임 (나중에 사용)
+# prod.goormgb.help NS 위임 (나중에 사용)
 resource "aws_route53_record" "prod_ns" {
   count = length(var.prod_zone_name_servers) > 0 ? 1 : 0
 
@@ -37,7 +37,7 @@ resource "aws_route53_record" "prod_ns" {
   records = var.prod_zone_name_servers
 }
 
-# pentest.playball.one NS 위임 (pen-testing 계정으로 위임)
+# pentest.goormgb.help NS 위임 (pen-testing 계정으로 위임)
 resource "aws_route53_record" "pentest_ns" {
   count = length(var.pentest_zone_name_servers) > 0 ? 1 : 0
 
@@ -48,7 +48,7 @@ resource "aws_route53_record" "pentest_ns" {
   records = var.pentest_zone_name_servers
 }
 
-# loadtest.playball.one NS 위임 (k6-operators 계정으로 위임)
+# loadtest.goormgb.help NS 위임 (k6-operators 계정으로 위임)
 resource "aws_route53_record" "loadtest_ns" {
   count = length(var.loadtest_zone_name_servers) > 0 ? 1 : 0
 
@@ -60,7 +60,7 @@ resource "aws_route53_record" "loadtest_ns" {
 }
 
 #############################################
-# Vercel - playball.one (루트 도메인)
+# Vercel - goormgb.help (루트 도메인)
 #############################################
 resource "aws_route53_record" "vercel_root" {
   zone_id = aws_route53_zone.root.zone_id
@@ -71,7 +71,7 @@ resource "aws_route53_record" "vercel_root" {
 }
 
 #############################################
-# Netlify - guide.playball.one (문서 사이트)
+# Netlify - guide.goormgb.help (문서 사이트)
 #############################################
 
 resource "aws_route53_record" "guide" {

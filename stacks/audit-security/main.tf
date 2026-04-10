@@ -243,9 +243,9 @@ module "audit_events" {
   summary_prefix        = "lifecycle-expiration-summary"
 
   monitored_bucket_names = [
-    "playball-backup",
-    "playball-audit-logs",
-    "playball-archive",
+    "playball-web-backup",
+    "playball-cloudtrail-audit",
+    "playball-retention-archive",
     "playball-ai-data",
     "playball-ai-backup"
   ]

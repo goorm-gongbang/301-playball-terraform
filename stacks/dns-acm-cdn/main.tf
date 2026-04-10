@@ -1,8 +1,8 @@
 #############################################
 # DNS / ACM / CDN Stack
-# - Route53 루트 도메인 (playball.one)
+# - Route53 루트 도메인 (goormgb.help)
 # - ACM 와일드카드 인증서 (us-east-1 + ap-northeast-2)
-# - CloudFront CDN (assets.playball.one)
+# - CloudFront CDN (assets.goormgb.help)
 # - Assets S3 bucket (playball-assets)
 #############################################
 
@@ -17,7 +17,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tf-state"
+    bucket       = "playball-tfstate"
     key          = "dns/root/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true

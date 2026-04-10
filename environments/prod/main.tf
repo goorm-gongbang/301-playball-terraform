@@ -53,12 +53,14 @@ module "eks" {
 
   # Node Group - Monitoring
   monitoring_instance_types = local.config.eks.node_groups.monitoring.instance_types
+  monitoring_capacity_type  = lookup(local.config.eks.node_groups.monitoring, "capacity_type", "SPOT")
   monitoring_min_size       = local.config.eks.node_groups.monitoring.min_size
   monitoring_max_size       = local.config.eks.node_groups.monitoring.max_size
   monitoring_desired_size   = local.config.eks.node_groups.monitoring.desired_size
 
   # Node Group - Infra
   infra_instance_types = local.config.eks.node_groups.infra.instance_types
+  infra_capacity_type  = lookup(local.config.eks.node_groups.infra, "capacity_type", "SPOT")
   infra_min_size       = local.config.eks.node_groups.infra.min_size
   infra_max_size       = local.config.eks.node_groups.infra.max_size
   infra_desired_size   = local.config.eks.node_groups.infra.desired_size
@@ -179,7 +181,7 @@ module "ops_alerting" {
   alarms_enabled         = true
 
   rds_instance_identifier = module.rds.identifier
-  backup_s3_bucket        = "playball-backup"
+  backup_s3_bucket        = "playball-web-backup"
 
   depends_on = [module.elasticache, module.rds]
 }

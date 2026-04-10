@@ -1,6 +1,6 @@
 #############################################
 # ACM Certificate - us-east-1 (CloudFront용)
-# *.playball.one 와일드카드 인증서
+# *.goormgb.help 와일드카드 인증서
 # enable_acm = true 일 때만 생성
 #############################################
 

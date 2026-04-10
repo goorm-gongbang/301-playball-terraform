@@ -52,12 +52,14 @@ module "eks" {
 
   # Node Group - Monitoring
   monitoring_instance_types = local.config.eks.node_groups.monitoring.instance_types
+  monitoring_capacity_type  = lookup(local.config.eks.node_groups.monitoring, "capacity_type", "SPOT")
   monitoring_min_size       = local.config.eks.node_groups.monitoring.min_size
   monitoring_max_size       = local.config.eks.node_groups.monitoring.max_size
   monitoring_desired_size   = local.config.eks.node_groups.monitoring.desired_size
 
   # Node Group - Infra
   infra_instance_types = local.config.eks.node_groups.infra.instance_types
+  infra_capacity_type  = lookup(local.config.eks.node_groups.infra, "capacity_type", "SPOT")
   infra_min_size       = local.config.eks.node_groups.infra.min_size
   infra_max_size       = local.config.eks.node_groups.infra.max_size
   infra_desired_size   = local.config.eks.node_groups.infra.desired_size
@@ -75,23 +77,7 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
-#############################################
-# Bastion Module
-#############################################
-
-module "bastion" {
-  source = "../../modules/bastion"
-
-  owner_name  = local.owner
-  environment = local.env
-
-  vpc_id           = module.vpc.vpc_id
-  vpc_cidr         = local.config.vpc.cidr
-  public_subnet_id = module.vpc.public_subnet_ids[0]
-  instance_type    = local.config.bastion.instance_type
-
-  depends_on = [module.vpc]
-}
+# Bastion 미사용 (staging은 SSM으로 직접 접근)
 
 #############################################
 # ElastiCache Module (Redis)
@@ -181,7 +167,7 @@ module "dns" {
   }
 
   environment  = local.env
-  domain_name  = "playball.one"
+  domain_name  = "goormgb.help"
   vercel_ip    = "76.76.21.21"
   vercel_cname = "912cfcafdeccf2b2.vercel-dns-017.com"
 }
@@ -199,7 +185,7 @@ module "cdn" {
   }
 
   environment = local.env
-  domain      = "api.${local.env}.playball.one"
+  domain      = "api.${local.env}.goormgb.help"
 
   # CloudFront origin
   alb_dns             = local.config.cdn.alb_dns
@@ -280,7 +266,7 @@ module "ops_alerting" {
   alarms_enabled         = lookup(local.config, "ops_alerting_enabled", true)
 
   rds_instance_identifier = module.rds.identifier
-  backup_s3_bucket        = "playball-backup"
+  backup_s3_bucket        = "playball-web-backup"
 
   depends_on = [module.elasticache, module.rds]
 }

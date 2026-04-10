@@ -17,7 +17,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tf-state"
+    bucket       = "playball-tfstate"
     key          = "staging/terraform.tfstate"
     region       = "ap-northeast-2"
     encrypt      = true

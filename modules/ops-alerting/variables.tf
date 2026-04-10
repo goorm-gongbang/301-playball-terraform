@@ -78,7 +78,7 @@ variable "rds_instance_identifier" {
 variable "backup_s3_bucket" {
   description = "보조 백업 S3 bucket"
   type        = string
-  default     = "playball-backup"
+  default     = "playball-web-backup"
 }
 
 variable "backup_check_schedule" {

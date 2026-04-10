@@ -4,12 +4,12 @@
 
 # Route53 Hosted Zone
 output "root_zone_id" {
-  description = "Route53 Hosted Zone ID for playball.one"
+  description = "Route53 Hosted Zone ID for goormgb.help"
   value       = aws_route53_zone.root.zone_id
 }
 
 output "root_zone_name_servers" {
-  description = "Name servers for playball.one (Porkbun에 설정 필요)"
+  description = "Name servers for goormgb.help (Porkbun에 설정 필요)"
   value       = aws_route53_zone.root.name_servers
 }
 
@@ -49,7 +49,7 @@ output "porkbun_ns_records" {
     Porkbun DNS 설정 방법
     ========================================
 
-    1. Porkbun 로그인 → Domain Management → playball.one
+    1. Porkbun 로그인 → Domain Management → goormgb.help
     2. DNS Records 탭
     3. 기존 NS 레코드 삭제 (있다면)
     4. 아래 NS 레코드 추가:

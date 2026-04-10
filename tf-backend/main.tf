@@ -3,7 +3,7 @@
 #############################################
 
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "${var.project_name}-tf-state"
+  bucket = "playball-tfstate"
 
   lifecycle {
     prevent_destroy = true

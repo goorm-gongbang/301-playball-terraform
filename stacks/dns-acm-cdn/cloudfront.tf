@@ -1,6 +1,6 @@
 #############################################
 # CloudFront - Assets CDN (공통)
-# assets.playball.one → S3 playball-assets
+# assets.goormgb.help → S3 playball-assets
 #############################################
 
 data "aws_caller_identity" "current" {}
@@ -49,7 +49,7 @@ resource "aws_cloudfront_distribution" "assets" {
   count = var.enable_acm ? 1 : 0
 
   enabled             = true
-  comment             = "Assets CDN - playball.one (shared)"
+  comment             = "Assets CDN - goormgb.help (shared)"
   aliases             = ["assets.${var.domain_name}"]
   price_class         = "PriceClass_200"
   default_root_object = "index.html"
@@ -92,7 +92,7 @@ resource "aws_cloudfront_distribution" "assets" {
 }
 
 #############################################
-# Route53 Record - assets.playball.one
+# Route53 Record - assets.goormgb.help
 #############################################
 
 resource "aws_route53_record" "assets" {
