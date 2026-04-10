@@ -1,111 +1,67 @@
 #############################################
-# IAM Module - Main Resources
+# Account IAM Module
+# Password policy, groups, users, policies
 #############################################
 
-data "aws_caller_identity" "current" {}
-
-#############################################
-# IAM Group
-#############################################
-
-resource "aws_iam_group" "team" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = local.actual_team_prefix
+resource "aws_iam_account_alias" "this" {
+  account_alias = var.project_name
 }
 
 #############################################
-# IAM Users
+# Account Password Policy
 #############################################
 
-resource "aws_iam_user" "users" {
-  for_each = toset(var.iam_users)
-  name     = "${local.actual_team_prefix}_${each.key}"
-
-  tags = {
-    Name = "${local.actual_team_prefix}_${each.key}"
-  }
-}
-
-resource "aws_iam_user_group_membership" "memberships" {
-  for_each = toset(var.iam_users)
-  user     = aws_iam_user.users[each.key].name
-  groups   = [aws_iam_group.team[0].name]
+resource "aws_iam_account_password_policy" "this" {
+  minimum_password_length        = 12
+  require_lowercase_characters   = true
+  require_uppercase_characters   = true
+  require_numbers                = true
+  require_symbols                = true
+  allow_users_to_change_password = true
+  max_password_age               = 90
+  password_reuse_prevention      = 5
 }
 
 #############################################
-# IAM Roles - DevOps (EKS + ECR + SSM)
+# Cost Explorer Read Policy
 #############################################
 
-resource "aws_iam_role" "devops" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-devops-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = { Name = "${local.actual_team_prefix}-devops-role" }
-}
-
-resource "aws_iam_role_policy" "devops" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-devops-policy"
-  role  = aws_iam_role.devops[0].id
+resource "aws_iam_policy" "cost_explorer_read" {
+  name        = "CostExplorerReadOnly"
+  description = "Cost Explorer 및 Cost Management 콘솔 읽기 권한"
+  path        = "/common/"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid      = "EKSFullAccess"
+        Sid      = "CostExplorerReadAccess"
         Effect   = "Allow"
-        Action   = ["eks:*"]
+        Action   = ["ce:Describe*", "ce:Get*", "ce:List*"]
         Resource = "*"
       },
       {
-        Sid    = "ECRFullAccess"
-        Effect = "Allow"
-        Action = [
-          "ecr:GetAuthorizationToken",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:PutImage",
-          "ecr:InitiateLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload",
-          "ecr:DescribeRepositories",
-          "ecr:ListImages"
-        ]
+        Sid      = "CostAndUsageReportReadAccess"
+        Effect   = "Allow"
+        Action   = ["cur:DescribeReportDefinitions", "cur:GetClassicReport", "cur:GetClassicReportPreferences", "cur:GetUsageReport"]
         Resource = "*"
       },
       {
-        Sid    = "SSMAccess"
-        Effect = "Allow"
-        Action = [
-          "ssm:StartSession",
-          "ssm:TerminateSession",
-          "ssm:ResumeSession",
-          "ssm:DescribeSessions",
-          "ssm:GetConnectionStatus"
-        ]
+        Sid      = "CostOptimizationHubReadAccess"
+        Effect   = "Allow"
+        Action   = ["cost-optimization-hub:Get*", "cost-optimization-hub:List*"]
         Resource = "*"
       },
       {
-        Sid    = "EC2DescribeForSSM"
-        Effect = "Allow"
-        Action = [
-          "ec2:DescribeInstances",
-          "ec2:DescribeTags"
-        ]
+        Sid      = "SavingsPlansReadAccess"
+        Effect   = "Allow"
+        Action   = ["savingsplans:Describe*", "savingsplans:List*"]
+        Resource = "*"
+      },
+      {
+        Sid      = "ComputeOptimizerReadAccess"
+        Effect   = "Allow"
+        Action   = ["compute-optimizer:Get*", "compute-optimizer:Describe*"]
         Resource = "*"
       }
     ]
@@ -113,187 +69,247 @@ resource "aws_iam_role_policy" "devops" {
 }
 
 #############################################
-# IAM Roles - Developer (SSM only)
+# IAM Group: CN (Cloud Native)
 #############################################
 
-resource "aws_iam_role" "developer" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-developer-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = { Name = "${local.actual_team_prefix}-developer-role" }
+resource "aws_iam_group" "cn" {
+  name = "CN"
+  path = "/teams/"
 }
 
-resource "aws_iam_role_policy" "developer" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-developer-policy"
-  role  = aws_iam_role.developer[0].id
+resource "aws_iam_user" "cn" {
+  for_each = var.cn_members
+
+  name = each.key
+  path = "/teams/cn/"
+  tags = { Team = "CN" }
+}
+
+resource "aws_iam_group_membership" "cn" {
+  name  = "cn-membership"
+  group = aws_iam_group.cn.name
+  users = [for user in aws_iam_user.cn : user.name]
+}
+
+resource "aws_iam_group_policy_attachment" "cn_billing" {
+  group      = aws_iam_group.cn.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSBillingReadOnlyAccess"
+}
+
+resource "aws_iam_group_policy_attachment" "cn_iam" {
+  group      = aws_iam_group.cn.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
+}
+
+resource "aws_iam_group_policy_attachment" "cn_cost_explorer" {
+  group      = aws_iam_group.cn.name
+  policy_arn = aws_iam_policy.cost_explorer_read.arn
+}
+
+#############################################
+# CN Common Access Policy
+#############################################
+
+resource "aws_iam_policy" "cn_common_access" {
+  name        = "CN-Common-Access"
+  description = "CN 그룹 공통 리소스 접근 권한"
+  path        = "/teams/"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "SSMBastionAccess"
-        Effect = "Allow"
-        Action = [
-          "ssm:StartSession",
-          "ssm:TerminateSession",
-          "ssm:ResumeSession",
-          "ssm:DescribeSessions",
-          "ssm:GetConnectionStatus"
-        ]
+        Sid      = "S3ListAllBuckets"
+        Effect   = "Allow"
+        Action   = ["s3:ListAllMyBuckets", "s3:GetBucketLocation"]
         Resource = "*"
       },
       {
-        Sid    = "EC2DescribeForSSM"
-        Effect = "Allow"
-        Action = [
-          "ec2:DescribeInstances",
-          "ec2:DescribeTags"
-        ]
+        Sid      = "S3BucketsFullAccess"
+        Effect   = "Allow"
+        Action   = "s3:*"
+        Resource = flatten([for arn in var.s3_full_access_bucket_arns : [arn, "${arn}/*"]])
+      },
+      {
+        Sid      = "ECRListRepositories"
+        Effect   = "Allow"
+        Action   = ["ecr:DescribeRepositories", "ecr:DescribeRegistry", "ecr:GetAuthorizationToken"]
+        Resource = "*"
+      },
+      {
+        Sid      = "SecretsManagerList"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:ListSecrets"]
         Resource = "*"
       }
     ]
   })
 }
 
-#############################################
-# IAM Roles - Secure (CloudWatch/CloudTrail Read)
-#############################################
-
-resource "aws_iam_role" "secure" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-secure-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = { Name = "${local.actual_team_prefix}-secure-role" }
+resource "aws_iam_group_policy_attachment" "cn_common_access" {
+  group      = aws_iam_group.cn.name
+  policy_arn = aws_iam_policy.cn_common_access.arn
 }
 
-resource "aws_iam_role_policy" "secure" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-secure-policy"
-  role  = aws_iam_role.secure[0].id
+#############################################
+# IAM Group: CICD Bots
+#############################################
+
+resource "aws_iam_group" "cicd_bots" {
+  name = "CICD-Bots-Group"
+  path = "/system/"
+}
+
+resource "aws_iam_user" "bot_teamcity" {
+  name = "bot-teamcity"
+  path = "/system/"
+  tags = { Purpose = "TeamCity CI/CD" }
+}
+
+resource "aws_iam_user" "bot_argocd" {
+  name = "bot-argocd"
+  path = "/system/"
+  tags = { Purpose = "ArgoCD GitOps" }
+}
+
+resource "aws_iam_user" "bot_kubeadm" {
+  name = "bot-kubeadm"
+  path = "/system/"
+  tags = { Purpose = "Kubeadm K8s Backup" }
+}
+
+resource "aws_iam_group_membership" "cicd_bots" {
+  name  = "cicd-bots-membership"
+  group = aws_iam_group.cicd_bots.name
+  users = [aws_iam_user.bot_teamcity.name, aws_iam_user.bot_argocd.name]
+}
+
+resource "aws_iam_group_policy_attachment" "cicd_bots_ecr" {
+  group      = aws_iam_group.cicd_bots.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+}
+
+#############################################
+# IAM Group: temp
+#############################################
+
+resource "aws_iam_group" "temp" {
+  name = "temp"
+  path = "/"
+}
+
+resource "aws_iam_user" "mighty" {
+  name = "mighty"
+  path = "/"
+  tags = { Purpose = "Temporary Admin" }
+}
+
+resource "aws_iam_group_membership" "temp" {
+  name  = "temp-membership"
+  group = aws_iam_group.temp.name
+  users = [aws_iam_user.mighty.name]
+}
+
+#############################################
+# bot-kubeadm Policies
+#############################################
+
+resource "aws_iam_policy" "bot_kubeadm_dev" {
+  name        = "bot-kubeadm-dev-access"
+  description = "bot-kubeadm access for dev environment backup and secrets"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "CloudWatchLogsRead"
-        Effect = "Allow"
-        Action = [
-          "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams",
-          "logs:GetLogEvents",
-          "logs:FilterLogEvents",
-          "logs:StartQuery",
-          "logs:GetQueryResults"
-        ]
+        Sid      = "S3BackupAccess"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::${var.backup_bucket_name}/dev/*"
+      },
+      {
+        Sid      = "S3ListBucket"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = "arn:aws:s3:::${var.backup_bucket_name}"
+        Condition = { StringLike = { "s3:prefix" = ["dev/*"] } }
+      },
+      {
+        Sid      = "SecretsManagerAccess"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.account_id}:secret:dev/*"
+      },
+      {
+        Sid      = "ECRAuthToken"
+        Effect   = "Allow"
+        Action   = "ecr:GetAuthorizationToken"
         Resource = "*"
       },
       {
-        Sid    = "CloudTrailRead"
-        Effect = "Allow"
-        Action = [
-          "cloudtrail:LookupEvents",
-          "cloudtrail:DescribeTrails",
-          "cloudtrail:GetTrailStatus"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "CloudWatchMetricsRead"
-        Effect = "Allow"
-        Action = [
-          "cloudwatch:GetMetricData",
-          "cloudwatch:GetMetricStatistics",
-          "cloudwatch:ListMetrics",
-          "cloudwatch:DescribeAlarms"
-        ]
-        Resource = "*"
+        Sid      = "ECRPullAccess"
+        Effect   = "Allow"
+        Action   = ["ecr:BatchCheckLayerAvailability", "ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage"]
+        Resource = "arn:aws:ecr:${var.aws_region}:${var.account_id}:repository/*"
       }
     ]
   })
 }
 
-#############################################
-# Group Policy - AssumeRole
-#############################################
+resource "aws_iam_user_policy_attachment" "bot_kubeadm_dev" {
+  user       = aws_iam_user.bot_kubeadm.name
+  policy_arn = aws_iam_policy.bot_kubeadm_dev.arn
+}
 
-resource "aws_iam_group_policy" "team" {
-  count = length(var.iam_users) > 0 ? 1 : 0
-  name  = "${local.actual_team_prefix}-policy"
-  group = aws_iam_group.team[0].name
+resource "aws_iam_policy" "bot_kubeadm_staging" {
+  name        = "bot-kubeadm-staging-access"
+  description = "bot-kubeadm access for staging log backup and secrets"
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = concat(
-      [
-        {
-          Sid    = "AssumeRoles"
-          Effect = "Allow"
-          Action = "sts:AssumeRole"
-          Resource = [
-            aws_iam_role.devops[0].arn,
-            aws_iam_role.developer[0].arn,
-            aws_iam_role.secure[0].arn
-          ]
-        },
-        {
-          Sid    = "EKSDescribe"
-          Effect = "Allow"
-          Action = [
-            "eks:DescribeCluster",
-            "eks:ListClusters"
-          ]
-          Resource = "*"
-        },
-        {
-          Sid    = "ECRCrossAccountAccess"
-          Effect = "Allow"
-          Action = [
-            "ecr:GetAuthorizationToken"
-          ]
-          Resource = "*"
-        }
-      ],
-      var.main_account_id != "" ? [
-        {
-          Sid    = "ECRPullFromMainAccount"
-          Effect = "Allow"
-          Action = [
-            "ecr:BatchCheckLayerAvailability",
-            "ecr:GetDownloadUrlForLayer",
-            "ecr:BatchGetImage",
-            "ecr:DescribeRepositories",
-            "ecr:ListImages"
-          ]
-          Resource = "arn:aws:ecr:${var.aws_region}:${var.main_account_id}:repository/*"
-        }
-      ] : []
-    )
+    Statement = [
+      {
+        Sid      = "S3StagingInfraLogsAccess"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::${var.backup_bucket_name}/staging/logs/infra/*"
+      },
+      {
+        Sid      = "S3StagingServiceLogsAccess"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::${var.backup_bucket_name}/staging/logs/service/*"
+      },
+      {
+        Sid      = "S3ListStagingLogsBucket"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = "arn:aws:s3:::${var.backup_bucket_name}"
+        Condition = { StringLike = { "s3:prefix" = ["staging/logs/infra/*", "staging/logs/service/*"] } }
+      },
+      {
+        Sid      = "SecretsManagerStagingAccess"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.account_id}:secret:staging/*"
+      },
+      {
+        Sid      = "ECRAuthToken"
+        Effect   = "Allow"
+        Action   = "ecr:GetAuthorizationToken"
+        Resource = "*"
+      },
+      {
+        Sid      = "ECRPullAccess"
+        Effect   = "Allow"
+        Action   = ["ecr:BatchCheckLayerAvailability", "ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage"]
+        Resource = "arn:aws:ecr:${var.aws_region}:${var.account_id}:repository/*"
+      }
+    ]
   })
+}
+
+resource "aws_iam_user_policy_attachment" "bot_kubeadm_staging" {
+  user       = aws_iam_user.bot_kubeadm.name
+  policy_arn = aws_iam_policy.bot_kubeadm_staging.arn
 }

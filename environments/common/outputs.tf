@@ -36,7 +36,7 @@ output "s3_ai_backup_bucket" {
 # IAM
 output "iam_group_cn_arn" {
   description = "CN IAM Group ARN"
-  value       = module.account_iam.cn_group_arn
+  value       = module.iam.cn_group_arn
 }
 
 # CloudTrail

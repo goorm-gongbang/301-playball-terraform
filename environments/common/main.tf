@@ -9,26 +9,29 @@ locals {
 }
 
 #############################################
-# S3 Buckets
+# S3 (Remote State from stacks/s3)
 #############################################
 
-module "s3" {
-  source = "../../modules/s3-common"
+data "terraform_remote_state" "s3" {
+  backend = "s3"
 
-  project_name = local.project_name
-  account_id   = local.account_id
+  config = {
+    bucket = "playball-tf-state"
+    key    = "common/s3/terraform.tfstate"
+    region = "ap-northeast-2"
+  }
+}
 
-  cloudtrail_source_arns = local.config.cloudtrail.enabled ? [
-    module.cloudtrail.source_arn
-  ] : []
+locals {
+  s3 = data.terraform_remote_state.s3.outputs
 }
 
 #############################################
 # Account IAM
 #############################################
 
-module "account_iam" {
-  source = "../../modules/account-iam"
+module "iam" {
+  source = "../../modules/iam"
 
   project_name = local.project_name
   aws_region   = local.aws_region
@@ -37,13 +40,11 @@ module "account_iam" {
   cn_members = local.config.iam.cn_members
 
   s3_full_access_bucket_arns = concat(
-    module.s3.all_bucket_arns,
+    local.s3.all_bucket_arns,
     ["arn:aws:s3:::playball-tf-state"]
   )
 
-  backup_bucket_name = module.s3.backup_bucket_id
-
-  depends_on = [module.s3]
+  backup_bucket_name = local.s3.backup_bucket_id
 }
 
 #############################################
@@ -57,13 +58,11 @@ module "cloudtrail" {
   aws_region   = local.aws_region
   enabled      = local.config.cloudtrail.enabled
 
-  audit_logs_bucket_id = module.s3.audit_logs_bucket_id
+  audit_logs_bucket_id = local.s3.audit_logs_bucket_id
   s3_key_prefix        = local.config.cloudtrail.s3_key_prefix
   log_retention_days   = local.config.cloudtrail.log_retention_days
 
-  tracked_s3_bucket_arns = module.s3.all_bucket_arns
-
-  depends_on = [module.s3]
+  tracked_s3_bucket_arns = local.s3.all_bucket_arns
 }
 
 #############################################
@@ -78,8 +77,8 @@ module "security_events" {
   account_id   = local.account_id
   enabled      = local.config.security_events.enabled
 
-  discord_secret_name  = local.config.security_events.discord_secret_name
-  discord_username     = local.config.security_events.discord_username
+  discord_secret_name   = local.config.security_events.discord_secret_name
+  discord_username      = local.config.security_events.discord_username
   critical_mention_text = local.config.security_events.critical_mention_text
 }
 
@@ -95,8 +94,8 @@ module "audit_events" {
   account_id   = local.account_id
   enabled      = local.config.audit_events.enabled
 
-  audit_logs_bucket_id  = module.s3.audit_logs_bucket_id
-  audit_logs_bucket_arn = module.s3.audit_logs_bucket_arn
+  audit_logs_bucket_id  = local.s3.audit_logs_bucket_id
+  audit_logs_bucket_arn = local.s3.audit_logs_bucket_arn
   summary_prefix        = local.config.audit_events.summary_prefix
 
   monitored_bucket_names = local.config.audit_events.monitored_buckets
@@ -104,8 +103,6 @@ module "audit_events" {
   discord_secret_name   = local.config.audit_events.discord_secret_name
   discord_username      = local.config.audit_events.discord_username
   critical_mention_text = local.config.audit_events.critical_mention_text
-
-  depends_on = [module.s3]
 }
 
 #############################################

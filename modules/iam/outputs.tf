@@ -1,48 +1,19 @@
-#############################################
-# IAM Module - Outputs
-#############################################
-
-output "group_name" {
-  description = "IAM group name"
-  value       = length(aws_iam_group.team) > 0 ? aws_iam_group.team[0].name : null
+output "cn_group_arn" {
+  description = "CN IAM Group ARN"
+  value       = aws_iam_group.cn.arn
 }
 
-output "user_arns" {
-  description = "Map of IAM user ARNs"
-  value       = { for k, v in aws_iam_user.users : k => v.arn }
+output "cn_group_name" {
+  description = "CN IAM Group name"
+  value       = aws_iam_group.cn.name
 }
 
-output "user_names" {
-  description = "Map of IAM user names"
-  value       = { for k, v in aws_iam_user.users : k => v.name }
+output "cicd_bots_group_name" {
+  description = "CICD Bots group name"
+  value       = aws_iam_group.cicd_bots.name
 }
 
-output "devops_role_arn" {
-  description = "DevOps IAM role ARN"
-  value       = length(aws_iam_role.devops) > 0 ? aws_iam_role.devops[0].arn : null
-}
-
-output "devops_role_name" {
-  description = "DevOps IAM role name"
-  value       = length(aws_iam_role.devops) > 0 ? aws_iam_role.devops[0].name : null
-}
-
-output "developer_role_arn" {
-  description = "Developer IAM role ARN"
-  value       = length(aws_iam_role.developer) > 0 ? aws_iam_role.developer[0].arn : null
-}
-
-output "secure_role_arn" {
-  description = "Secure IAM role ARN"
-  value       = length(aws_iam_role.secure) > 0 ? aws_iam_role.secure[0].arn : null
-}
-
-output "aws_lb_controller_role_arn" {
-  description = "AWS Load Balancer Controller IAM role ARN"
-  value       = length(aws_iam_role.aws_lb_controller) > 0 ? aws_iam_role.aws_lb_controller[0].arn : null
-}
-
-output "argocd_role_arn" {
-  description = "ArgoCD IAM role ARN"
-  value       = length(aws_iam_role.argocd) > 0 ? aws_iam_role.argocd[0].arn : null
+output "cn_common_access_policy_arn" {
+  description = "CN common access policy ARN"
+  value       = aws_iam_policy.cn_common_access.arn
 }
