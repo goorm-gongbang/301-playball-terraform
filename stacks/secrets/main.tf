@@ -25,11 +25,11 @@ locals {
       environment = "staging"
       description = "Grafana admin + Discord alert webhooks"
     }
-    "staging/ai-service" = {
+    "staging/ai-service/common" = {
       environment = "staging"
       description = "AI Defense: Redis, PG, ClickHouse, Auth-Guard, Internal API"
     }
-    "staging/goormgb/clickhouse" = {
+    "staging/ai-service/clickhouse" = {
       environment = "staging"
       description = "ClickHouse server credentials (Pod)"
     }
@@ -69,11 +69,11 @@ locals {
       environment = "prod"
       description = "Grafana admin + Discord alert webhooks"
     }
-    "prod/ai-service" = {
+    "prod/ai-service/common" = {
       environment = "prod"
       description = "AI Defense: Redis, PG, ClickHouse, Auth-Guard, Internal API"
     }
-    "prod/goormgb/clickhouse" = {
+    "prod/ai-service/clickhouse" = {
       environment = "prod"
       description = "ClickHouse server credentials (Pod)"
     }

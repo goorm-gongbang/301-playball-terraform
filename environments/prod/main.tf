@@ -278,3 +278,50 @@ resource "aws_secretsmanager_secret_version" "redis" {
 
   lifecycle { ignore_changes = [secret_string] }
 }
+
+#############################################
+# Static Secrets 엔드포인트 자동 주입
+# stacks/secrets에서 만든 시크릿의 host/port를 terraform apply 시 자동 갱신
+#############################################
+
+data "aws_secretsmanager_secret" "services_db" {
+  name = "prod/services/db"
+}
+
+resource "aws_secretsmanager_secret_version" "services_db" {
+  secret_id = data.aws_secretsmanager_secret.services_db.id
+  secret_string = jsonencode({
+    host              = module.rds.address
+    port              = 5432
+    dbname            = "goormgb"
+    username          = module.rds.username
+    password          = module.rds.master_password
+    engine            = "postgres"
+    DB_ENCRYPTION_KEY = ""
+  })
+
+  lifecycle { ignore_changes = [secret_string] }
+}
+
+data "aws_secretsmanager_secret" "ai_service_common" {
+  name = "prod/ai-service/common"
+}
+
+resource "aws_secretsmanager_secret_version" "ai_service_common" {
+  secret_id = data.aws_secretsmanager_secret.ai_service_common.id
+  secret_string = jsonencode({
+    redis_host       = module.elasticache.redis_endpoint
+    redis_port       = "6379"
+    pg_host          = module.rds.address
+    pg_port          = "5432"
+    pg_username      = "ai_defense"
+    pg_password      = "CHANGE_ME_IN_CONSOLE"
+    pg_dbname        = "ai_defense"
+    ch_user          = "default"
+    ch_password      = ""
+    AUTH_GUARD_URL   = "http://auth-guard.prod-webs.svc.cluster.local:8080/auth"
+    INTERNAL_API_KEY = ""
+  })
+
+  lifecycle { ignore_changes = [secret_string] }
+}

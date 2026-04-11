@@ -10,10 +10,10 @@ locals {
     "playball-staging-tempo"  = { environment = "staging", service = "tempo" }
     "playball-staging-thanos"     = { environment = "staging", service = "thanos" }
     "playball-staging-clickhouse" = { environment = "staging", service = "clickhouse" }
-    # Prod - 주석 해제하여 활성화
-    # "playball-prod-loki"      = { environment = "prod", service = "loki" }
-    # "playball-prod-tempo"     = { environment = "prod", service = "tempo" }
-    # "playball-prod-thanos"    = { environment = "prod", service = "thanos" }
+    "playball-prod-loki"         = { environment = "prod", service = "loki" }
+    "playball-prod-tempo"        = { environment = "prod", service = "tempo" }
+    "playball-prod-thanos"       = { environment = "prod", service = "thanos" }
+    "playball-prod-clickhouse"   = { environment = "prod", service = "clickhouse" }
   }
 
   lifecycle_config = {
@@ -33,25 +33,28 @@ locals {
       rule_id         = "expiry-14days"
       expiration_days = 14
     }
-    # Prod - 주석 해제하여 활성화
-    # "playball-prod-loki" = {
-    #   rule_id            = "expiry-90days"
-    #   expiration_days    = 90
-    #   transition_days    = 30
-    #   transition_storage = "GLACIER"
-    # }
-    # "playball-prod-tempo" = {
-    #   rule_id            = "expiry-90days"
-    #   expiration_days    = 90
-    #   transition_days    = 30
-    #   transition_storage = "GLACIER"
-    # }
-    # "playball-prod-thanos" = {
-    #   rule_id            = "expiry-180days"
-    #   expiration_days    = 180
-    #   transition_days    = 90
-    #   transition_storage = "GLACIER"
-    # }
+    "playball-prod-loki" = {
+      rule_id            = "expiry-90days"
+      expiration_days    = 90
+      transition_days    = 30
+      transition_storage = "GLACIER"
+    }
+    "playball-prod-tempo" = {
+      rule_id            = "expiry-90days"
+      expiration_days    = 90
+      transition_days    = 30
+      transition_storage = "GLACIER"
+    }
+    "playball-prod-thanos" = {
+      rule_id            = "expiry-180days"
+      expiration_days    = 180
+      transition_days    = 90
+      transition_storage = "GLACIER"
+    }
+    "playball-prod-clickhouse" = {
+      rule_id         = "expiry-14days"
+      expiration_days = 14
+    }
   }
 }
 
