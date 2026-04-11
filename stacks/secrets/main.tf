@@ -1,48 +1,53 @@
 #############################################
-# Static Secrets - 인프라 재생성과 무관
+# Static Secrets - 12개 통합 시크릿
 # 값은 AWS Console에서 직접 관리
+# 동적 시크릿 (db, redis)은 environments/staging/main.tf에서 관리
 #############################################
 
 locals {
   secrets = {
-    ###########################################
-    # Staging - Infra
-    ###########################################
-    "staging/infra/oauth/teams-allow" = {
+    # 통합 시크릿
+    "staging/argocd" = {
       environment = "staging"
-      description = "Google OAuth credentials for admin tools (RedisInsight, CloudBeaver, Kiali)"
+      description = "ArgoCD: SSH key, OAuth, Discord webhook (통합)"
     }
-    "staging/infra/ghcr" = {
+    "staging/infra/oauth" = {
       environment = "staging"
-      description = "GHCR credentials for pulling private container images"
+      description = "Google OAuth (ArgoCD/Grafana)"
+    }
+    "staging/infra/oauth-teams" = {
+      environment = "staging"
+      description = "Admin Tools OAuth (CloudBeaver/Kiali)"
+    }
+    "staging/monitoring" = {
+      environment = "staging"
+      description = "Grafana admin + Discord alert webhooks (통합)"
+    }
+    "staging/ai-service" = {
+      environment = "staging"
+      description = "AI Defense: Redis, PG, ClickHouse, Auth-Guard, Internal API (통합)"
+    }
+    "staging/goormgb/clickhouse" = {
+      environment = "staging"
+      description = "ClickHouse server credentials (Pod)"
     }
 
-    ###########################################
-    # Staging - Services
-    ###########################################
-    "staging/services/internal-api" = {
+    # 개별 서비스 시크릿
+    "staging/services/jwt" = {
       environment = "staging"
-      description = "Internal API Key for AI Server - Auth-Guard communication"
+      description = "JWT RSA keys and configuration"
     }
     "staging/services/kafka" = {
       environment = "staging"
       description = "Kafka configuration for producer/consumer"
     }
-    "staging/services/s3-qna" = {
-      environment = "staging"
-      description = "S3 credentials for QnA file upload"
-    }
     "staging/services/mail" = {
       environment = "staging"
-      description = "Gmail SMTP credentials for email notifications"
+      description = "Gmail SMTP credentials"
     }
-    "staging/ai-service/clickhouse" = {
+    "staging/services/oauth/kakao" = {
       environment = "staging"
-      description = "ClickHouse credentials for AI Defense observability warehouse"
-    }
-    "staging/goormgb/clickhouse" = {
-      environment = "staging"
-      description = "ClickHouse server credentials"
+      description = "Kakao OAuth credentials"
     }
   }
 }
@@ -84,119 +89,3 @@ resource "aws_secretsmanager_secret_version" "staging_kafka" {
 
   lifecycle { ignore_changes = [secret_string] }
 }
-
-# ###########################################
-# # Dev - 주석 해제하여 활성화
-# ###########################################
-# "dev/argocd/github-ssh" = {
-#   environment = "dev"
-#   description = "ArgoCD GitHub SSH key for repo access"
-# }
-# "dev/argocd/webhook-github" = {
-#   environment = "dev"
-#   description = "ArgoCD GitHub webhook secret for auto-sync"
-# }
-# "dev/argocd/discord-webhook" = {
-#   environment = "dev"
-#   description = "ArgoCD Discord webhooks for notifications (app + infra)"
-# }
-# "dev/monitoring/discord-webhook-alerts" = {
-#   environment = "dev"
-#   description = "Discord webhooks for Prometheus/Alertmanager notifications"
-# }
-# "dev/monitoring/grafana" = {
-#   environment = "dev"
-#   description = "Grafana admin credentials"
-# }
-# "dev/infra/oauth/google" = {
-#   environment = "dev"
-#   description = "Google OAuth credentials for ArgoCD/Grafana/infra-console"
-# }
-# "dev/infra/oauth/swagger" = {
-#   environment = "dev"
-#   description = "Google OAuth credentials for Swagger UI authentication"
-# }
-# "dev/infra/oauth/teams-allow" = {
-#   environment = "dev"
-#   description = "Google OAuth credentials for admin tools"
-# }
-# "dev/infra/cloudflare" = {
-#   environment = "dev"
-#   description = "Cloudflare API credentials for DDNS"
-# }
-# "dev/infra/s3-backup" = {
-#   environment = "dev"
-#   description = "S3 backup credentials"
-# }
-# "dev/services/jwt" = {
-#   environment = "dev"
-#   description = "JWT RSA keys and configuration"
-# }
-# "dev/services/oauth/kakao" = {
-#   environment = "dev"
-#   description = "Kakao OAuth credentials"
-# }
-# "dev/oauth/rbac/argocd" = {
-#   environment = "dev"
-#   description = "ArgoCD RBAC configuration"
-# }
-# "dev/services/queue-jwt" = {
-#   environment = "dev"
-#   description = "Queue service admission token configuration"
-# }
-# "dev/services/internal-api" = {
-#   environment = "dev"
-#   description = "Internal API Key for AI Server - Auth-Guard communication"
-# }
-# "dev/services/kafka" = {
-#   environment = "dev"
-#   description = "Kafka configuration for producer/consumer"
-# }
-# "dev/services/mail" = {
-#   environment = "dev"
-#   description = "Gmail SMTP credentials for email notifications"
-# }
-# "dev/services/s3-qna" = {
-#   environment = "dev"
-#   description = "S3 credentials for QnA file upload"
-# }
-
-# ###########################################
-# # Prod - 주석 해제하여 활성화
-# ###########################################
-# "prod/infra/oauth/teams-allow" = {
-#   environment = "prod"
-#   description = "Google OAuth credentials for admin tools"
-# }
-# "prod/infra/ghcr" = {
-#   environment = "prod"
-#   description = "GHCR credentials for pulling private container images"
-# }
-# "prod/monitoring/discord-webhook-alerts" = {
-#   environment = "prod"
-#   description = "Discord webhooks for Prometheus/Alertmanager notifications"
-# }
-# "prod/services/internal-api" = {
-#   environment = "prod"
-#   description = "Internal API Key for AI Server - Auth-Guard communication"
-# }
-# "prod/services/kafka" = {
-#   environment = "prod"
-#   description = "Kafka configuration for producer/consumer"
-# }
-# "prod/services/mail" = {
-#   environment = "prod"
-#   description = "Gmail SMTP credentials for email notifications"
-# }
-# "prod/services/jwt" = {
-#   environment = "prod"
-#   description = "JWT RSA keys and configuration"
-# }
-# "prod/ai-service/clickhouse" = {
-#   environment = "prod"
-#   description = "ClickHouse credentials for AI Defense observability warehouse"
-# }
-# "prod/goormgb/clickhouse" = {
-#   environment = "prod"
-#   description = "ClickHouse server credentials"
-# }
