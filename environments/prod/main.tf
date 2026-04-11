@@ -208,16 +208,7 @@ module "observability_irsa" {
   depends_on = [module.eks]
 }
 
-#############################################
-# Domain & ACM (Fetched from Common)
-#############################################
-
-data "aws_acm_certificate" "common" {
-  domain      = local.config.domain
-  types       = ["AMAZON_ISSUED"]
-  most_recent = true
-  statuses    = ["ISSUED"]
-}
+# DNS + CDN은 메인 계정에서 관리 (cross-account)
 
 #############################################
 # Dynamic Secrets (인프라 엔드포인트 자동 주입)

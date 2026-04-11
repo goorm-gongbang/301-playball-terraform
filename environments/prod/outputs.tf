@@ -93,12 +93,6 @@ output "redis_endpoint" {
   value       = module.elasticache.redis_endpoint
 }
 
-# ACM
-output "acm_certificate_arn" {
-  description = "ACM certificate ARN"
-  value       = data.aws_acm_certificate.common.arn
-}
-
 # RDS
 output "rds_endpoint" {
   description = "RDS endpoint"

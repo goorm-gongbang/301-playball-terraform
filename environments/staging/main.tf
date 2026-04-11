@@ -154,64 +154,8 @@ module "karpenter" {
   depends_on = [module.eks]
 }
 
-#############################################
-# DNS Module (Route53 + ACM)
-#############################################
-
-module "dns" {
-  source = "../../modules/dns"
-
-  providers = {
-    aws           = aws
-    aws.us_east_1 = aws.us_east_1
-  }
-
-  environment  = local.env
-  domain_name  = "goormgb.help"
-  vercel_ip    = "76.76.21.21"
-  vercel_cname = "912cfcafdeccf2b2.vercel-dns-017.com"
-}
-
-#############################################
-# CDN Module (CloudFront + WAF + ALB SG)
-#############################################
-
-module "cdn" {
-  source = "../../modules/cdn"
-
-  providers = {
-    aws           = aws
-    aws.us_east_1 = aws.us_east_1
-  }
-
-  environment = local.env
-  domain      = "api.${local.env}.goormgb.help"
-
-  # CloudFront origin
-  alb_dns             = local.config.cdn.alb_dns
-  acm_certificate_arn = module.dns.acm_cloudfront_arn
-
-  # Route53
-  route53_zone_id     = module.dns.zone_id
-  route53_record_name = "api"
-
-  # ALB SG (태그 기반 자동 발견)
-  eks_cluster_name  = module.eks.cluster_name
-  alb_ingress_stack = "${local.env}-alb"
-  admin_allowed_ips = local.config.cdn.admin_allowed_ips
-
-  # WAF (코드 준비됨, 필요 시 true로 변경)
-  enable_waf             = false
-  waf_geo_allow_only     = ["KR"]
-  waf_rate_limit_global  = 1500
-  waf_rate_limit_auth    = 50
-  waf_max_body_size      = 8192
-  waf_exclude_paths      = ["/load-test/"]
-  waf_enable_bot_control = false
-  waf_enable_atp         = false
-
-  depends_on = [module.dns, module.eks]
-}
+# DNS + CDN은 메인 계정에서 관리 (cross-account)
+# Phase 2에서 메인 계정 CloudFront → kj 계정 ALB로 연결
 
 # #############################################
 # # Realtime Stats (1주 한정)

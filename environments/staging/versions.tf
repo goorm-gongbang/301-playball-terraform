@@ -52,17 +52,3 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-# CloudFront + WAF는 us-east-1 필수
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-
-  default_tags {
-    tags = {
-      Environment = local.config.environment
-      ManagedBy   = "terraform"
-      Owner       = local.config.owner_name
-      Project     = "goormgb-${local.config.environment}"
-    }
-  }
-}
