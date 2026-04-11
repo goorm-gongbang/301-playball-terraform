@@ -30,24 +30,9 @@ resource "aws_security_group" "bastion" {
   description = "Security group for bastion host"
   vpc_id      = var.vpc_id
 
-  # SSH for EC2 Instance Connect (AWS managed IP range for ap-northeast-2)
-  # https://ip-ranges.amazonaws.com/ip-ranges.json - EC2_INSTANCE_CONNECT service
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["13.209.1.56/29"] # EC2 Instance Connect ap-northeast-2
-    description = "SSH for EC2 Instance Connect"
-  }
-
-  # [수정됨] var.allowed_ssh_cidr 사용
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_ssh_cidr
-    description = "SSH for bastion (restricted IPs)"
-  }
+  # SSH 미사용 — SSM Session Manager 전용
+  # ingress 없음 = 외부 접근 완전 차단
+  # SSM은 egress 443만으로 동작 (AWS API 통신)
 
   egress {
     from_port   = 443
@@ -71,6 +56,14 @@ resource "aws_security_group" "bastion" {
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
     description = "Redis (ElastiCache)"
+  }
+
+  egress {
+    from_port   = 8123
+    to_port     = 8123
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+    description = "ClickHouse (HTTP)"
   }
 
   tags = {
