@@ -217,12 +217,6 @@ module "observability_irsa" {
 
 locals {
   dynamic_secrets = {
-    "prod/ai-service/postgres" = {
-      description = "PostgreSQL connection for AI Defense policy control-plane (prod)"
-    }
-    "prod/ai-service/redis" = {
-      description = "Redis connection for AI Defense session storage (prod)"
-    }
     "prod/services/redis" = {
       description = "Redis connection credentials (prod)"
     }
@@ -245,29 +239,6 @@ resource "aws_secretsmanager_secret" "dynamic" {
   lifecycle {
     ignore_changes = [description]
   }
-}
-
-resource "aws_secretsmanager_secret_version" "ai_postgres" {
-  secret_id = aws_secretsmanager_secret.dynamic["prod/ai-service/postgres"].id
-  secret_string = jsonencode({
-    host     = module.rds.address
-    port     = "5432"
-    username = module.rds.username
-    password = "CHANGE_ME_IN_CONSOLE"
-    dbname   = "ai_defense"
-  })
-
-  lifecycle { ignore_changes = [secret_string] }
-}
-
-resource "aws_secretsmanager_secret_version" "ai_redis" {
-  secret_id = aws_secretsmanager_secret.dynamic["prod/ai-service/redis"].id
-  secret_string = jsonencode({
-    host = module.elasticache.redis_endpoint
-    port = "6379"
-  })
-
-  lifecycle { ignore_changes = [secret_string] }
 }
 
 resource "aws_secretsmanager_secret_version" "redis" {

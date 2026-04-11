@@ -260,12 +260,6 @@ module "observability_irsa" {
 
 locals {
   dynamic_secrets = {
-    "staging/ai-service/redis" = {
-      description = "Redis connection for AI Defense session storage"
-    }
-    "staging/ai-service/postgres" = {
-      description = "PostgreSQL connection for AI Defense policy control-plane"
-    }
     "staging/services/redis" = {
       description = "Redis connection (ElastiCache endpoint)"
     }
@@ -290,28 +284,6 @@ resource "aws_secretsmanager_secret" "dynamic" {
   }
 }
 
-resource "aws_secretsmanager_secret_version" "ai_redis" {
-  secret_id = aws_secretsmanager_secret.dynamic["staging/ai-service/redis"].id
-  secret_string = jsonencode({
-    host = module.elasticache.redis_endpoint
-    port = "6379"
-  })
-
-  lifecycle { ignore_changes = [secret_string] }
-}
-
-resource "aws_secretsmanager_secret_version" "ai_postgres" {
-  secret_id = aws_secretsmanager_secret.dynamic["staging/ai-service/postgres"].id
-  secret_string = jsonencode({
-    host     = module.rds.address
-    port     = "5432"
-    username = "ai_defense"
-    password = "CHANGE_ME_IN_CONSOLE"
-    dbname   = "ai_defense"
-  })
-
-  lifecycle { ignore_changes = [secret_string] }
-}
 
 #############################################
 # Static Secrets 엔드포인트 자동 주입
