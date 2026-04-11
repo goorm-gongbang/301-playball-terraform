@@ -232,8 +232,9 @@ locals {
 resource "aws_secretsmanager_secret" "dynamic" {
   for_each = local.dynamic_secrets
 
-  name        = each.key
-  description = each.value.description
+  name                    = each.key
+  description             = each.value.description
+  recovery_window_in_days = 0  # destroy 시 즉시 삭제 (재생성 충돌 방지)
 
   tags = {
     Name        = each.key
