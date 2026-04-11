@@ -59,11 +59,6 @@ output "eks_cluster_endpoint" {
   value       = module.eks.cluster_endpoint
 }
 
-output "eks_cluster_version" {
-  description = "EKS cluster version"
-  value       = module.eks.cluster_version
-}
-
 output "eks_cluster_certificate_authority" {
   description = "EKS cluster CA certificate (base64)"
   value       = module.eks.cluster_certificate_authority_data
