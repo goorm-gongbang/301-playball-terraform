@@ -281,27 +281,9 @@ resource "aws_secretsmanager_secret_version" "redis" {
 
 #############################################
 # Static Secrets 엔드포인트 자동 주입
-# stacks/secrets에서 만든 시크릿의 host/port를 terraform apply 시 자동 갱신
+# services/db → RDS 모듈이 자동 생성/주입
+# services/redis → dynamic_secrets에서 생성
 #############################################
-
-data "aws_secretsmanager_secret" "services_db" {
-  name = "prod/services/db"
-}
-
-resource "aws_secretsmanager_secret_version" "services_db" {
-  secret_id = data.aws_secretsmanager_secret.services_db.id
-  secret_string = jsonencode({
-    host              = module.rds.address
-    port              = 5432
-    dbname            = "goormgb"
-    username          = module.rds.username
-    password          = module.rds.master_password
-    engine            = "postgres"
-    DB_ENCRYPTION_KEY = ""
-  })
-
-  lifecycle { ignore_changes = [secret_string] }
-}
 
 data "aws_secretsmanager_secret" "ai_service_common" {
   name = "prod/ai-service/common"

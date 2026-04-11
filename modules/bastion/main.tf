@@ -117,7 +117,7 @@ resource "aws_instance" "bastion" {
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   iam_instance_profile        = aws_iam_instance_profile.bastion.name
   associate_public_ip_address = true
-  key_name                    = "goormgb-prod-bastion"
+  # SSH 미사용 (SSM 전용) — key_name 불필요
 
   root_block_device {
     volume_type           = "gp3"
