@@ -5,7 +5,7 @@
 # 사용: AWS_PROFILE=wonny bash scripts/ecr-cross-account.sh
 #############################################
 
-set -euo pipefail
+set +e  # 에러 무시하고 계속 진행
 
 POLICY='{"Version":"2012-10-17","Statement":[{"Sid":"AllowCrossAccountPull","Effect":"Allow","Principal":{"AWS":["arn:aws:iam::406223549139:role/goormgb-staging-apps-node-role","arn:aws:iam::406223549139:role/goormgb-staging-infra-node-role","arn:aws:iam::406223549139:role/goormgb-staging-monitoring-node-role"]},"Action":["ecr:GetDownloadUrlForLayer","ecr:BatchGetImage","ecr:BatchCheckLayerAvailability"]}]}'
 
@@ -36,6 +36,7 @@ for repo in "${REPOS[@]}"; do
     --repository-name "$repo" \
     --policy-text "$POLICY" \
     --region ap-northeast-2 \
+    --no-cli-pager \
     --query 'repositoryName' --output text 2>&1
 done
 

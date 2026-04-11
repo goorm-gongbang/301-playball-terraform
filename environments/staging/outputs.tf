@@ -121,6 +121,23 @@ output "karpenter" {
   }
 }
 
+# Bootstrap 호환 (개별 output)
+output "karpenter_irsa_role_arn" {
+  value = module.karpenter.controller_irsa_role_arn
+}
+output "karpenter_queue_name" {
+  value = module.karpenter.interruption_queue_name
+}
+output "eks_external_secrets_irsa_role_arn" {
+  value = module.eks.external_secrets_irsa_role_arn
+}
+output "rds_address" {
+  value = module.rds.address
+}
+output "redis_endpoint" {
+  value = module.elasticache.redis_endpoint
+}
+
 #############################################
 # RDS (PostgreSQL)
 #############################################
