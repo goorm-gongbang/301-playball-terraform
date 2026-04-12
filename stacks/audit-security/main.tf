@@ -256,6 +256,23 @@ module "audit_events" {
 }
 
 #############################################
+# Secret Change Events (EventBridge → Lambda → Discord)
+#############################################
+
+module "secret_change_events" {
+  source = "../../modules/secret-change-events"
+
+  project_name = local.project_name
+  aws_region   = local.aws_region
+  account_id   = local.account_id
+  enabled      = true
+
+  staging_discord_webhook_url = var.secret_change_staging_discord_webhook_url
+  dev_discord_webhook_url     = var.secret_change_dev_discord_webhook_url
+  discord_username            = "playball-secret-bot"
+}
+
+#############################################
 # Outputs
 #############################################
 
@@ -277,4 +294,8 @@ output "security_events_lambda_name" {
 
 output "audit_events_lambda_name" {
   value = module.audit_events.lambda_name
+}
+
+output "secret_change_events_lambda_name" {
+  value = module.secret_change_events.lambda_name
 }
