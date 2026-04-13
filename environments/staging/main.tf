@@ -115,6 +115,7 @@ module "elasticache" {
   node_type                  = local.config.elasticache.node_type
   num_cache_clusters         = local.config.elasticache.num_cache_clusters
   transit_encryption_enabled = lookup(local.config.elasticache, "transit_encryption", false)
+  transit_encryption_mode    = lookup(local.config.elasticache, "transit_encryption_mode", "preferred")
 
   # Bastion에서 Redis 접근 허용
   bastion_security_group_id = module.bastion.security_group_id

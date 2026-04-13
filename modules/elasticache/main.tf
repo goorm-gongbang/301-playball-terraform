@@ -112,7 +112,7 @@ resource "aws_elasticache_replication_group" "main" {
   # Encryption
   at_rest_encryption_enabled = true
   transit_encryption_enabled = var.transit_encryption_enabled
-  transit_encryption_mode    = var.transit_encryption_enabled ? "preferred" : null
+  transit_encryption_mode    = var.transit_encryption_enabled ? var.transit_encryption_mode : null
   apply_immediately          = true
 
   tags = {

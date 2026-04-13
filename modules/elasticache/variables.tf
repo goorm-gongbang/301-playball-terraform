@@ -81,6 +81,12 @@ variable "transit_encryption_enabled" {
   default     = false
 }
 
+variable "transit_encryption_mode" {
+  description = "TLS mode: 'preferred' (TLS+non-TLS both open) or 'required' (TLS only)"
+  type        = string
+  default     = "preferred"
+}
+
 #############################################
 # Local - Name Prefix & Slug
 #############################################

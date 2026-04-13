@@ -122,6 +122,12 @@ resource "aws_db_parameter_group" "main" {
     value = "1000"
   }
 
+  # SSL 강제 (non-SSL 접속 거부)
+  parameter {
+    name  = "rds.force_ssl"
+    value = "1"
+  }
+
   # Connection pool size (default ~83 for t4g.medium)
   parameter {
     name         = "max_connections"
