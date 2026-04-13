@@ -23,8 +23,13 @@ output "private_subnet_ids" {
 }
 
 output "nat_gateway_id" {
-  description = "NAT Gateway ID"
-  value       = aws_nat_gateway.main.id
+  description = "NAT Gateway ID (first one if multi-AZ)"
+  value       = var.enable_multi_az_nat ? aws_nat_gateway.per_az[0].id : aws_nat_gateway.main[0].id
+}
+
+output "nat_gateway_ids" {
+  description = "All NAT Gateway IDs"
+  value       = var.enable_multi_az_nat ? aws_nat_gateway.per_az[*].id : [aws_nat_gateway.main[0].id]
 }
 
 output "internet_gateway_id" {
@@ -43,11 +48,21 @@ output "public_route_table_id" {
 }
 
 output "private_route_table_id" {
-  description = "Private route table ID"
-  value       = aws_route_table.private.id
+  description = "Private route table ID (first one if multi-AZ)"
+  value       = var.enable_multi_az_nat ? aws_route_table.private_per_az[0].id : aws_route_table.private[0].id
+}
+
+output "private_route_table_ids" {
+  description = "All private route table IDs"
+  value       = var.enable_multi_az_nat ? aws_route_table.private_per_az[*].id : [aws_route_table.private[0].id]
 }
 
 output "nat_gateway_public_ip" {
-  description = "Public IP of the NAT Gateway"
-  value       = aws_eip.nat.public_ip
+  description = "NAT Gateway public IP (first one if multi-AZ)"
+  value       = var.enable_multi_az_nat ? aws_eip.nat_per_az[0].public_ip : aws_eip.nat[0].public_ip
+}
+
+output "nat_gateway_public_ips" {
+  description = "All NAT Gateway public IPs"
+  value       = var.enable_multi_az_nat ? aws_eip.nat_per_az[*].public_ip : [aws_eip.nat[0].public_ip]
 }

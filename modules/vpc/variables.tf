@@ -44,6 +44,12 @@ variable "enable_karpenter_discovery" {
   default     = true
 }
 
+variable "enable_multi_az_nat" {
+  description = "Create one NAT Gateway per AZ for HA (true) or single NAT for cost savings (false)"
+  type        = bool
+  default     = false
+}
+
 variable "vpc_endpoints" {
   description = "List of VPC interface endpoints to create (e.g., ecr.api, ecr.dkr, logs, sts)"
   type        = list(string)

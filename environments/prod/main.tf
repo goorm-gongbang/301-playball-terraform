@@ -25,6 +25,7 @@ module "vpc" {
   availability_zones   = local.config.vpc.availability_zones
   public_subnet_cidrs  = local.config.vpc.public_subnets
   private_subnet_cidrs = local.config.vpc.private_subnets
+  enable_multi_az_nat  = lookup(local.config.vpc, "enable_multi_az_nat", false)
   vpc_endpoints        = local.config.vpc_endpoints
 }
 

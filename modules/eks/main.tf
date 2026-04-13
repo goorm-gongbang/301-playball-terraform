@@ -413,7 +413,7 @@ resource "aws_eks_node_group" "monitoring" {
   labels = {
     "arch"          = "arm64"
     "role"          = "monitoring"
-    "capacity-type" = "spot"
+    "capacity-type" = lower(var.monitoring_capacity_type)
     "workload"      = "monitoring"
     "owner"         = var.owner_name
   }
@@ -527,7 +527,7 @@ resource "aws_eks_node_group" "apps" {
   labels = {
     "arch"          = "arm64"
     "role"          = "app"
-    "capacity-type" = "spot"
+    "capacity-type" = lower(var.apps_capacity_type)
     "workload"      = "app"
     "owner"         = var.owner_name
   }
