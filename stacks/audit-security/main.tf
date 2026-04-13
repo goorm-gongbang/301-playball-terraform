@@ -7,9 +7,10 @@
 #############################################
 
 locals {
-  project_name = "goormgb"
-  aws_region   = "ap-northeast-2"
-  account_id   = data.aws_caller_identity.current.account_id
+  project_name   = "playball"
+  aws_region     = "ap-northeast-2"
+  account_id     = data.aws_caller_identity.current.account_id
+  trail_arn      = "arn:aws:cloudtrail:${local.aws_region}:${local.account_id}:trail/${local.project_name}-audit-trail"
 }
 
 #############################################
@@ -75,53 +76,41 @@ data "aws_iam_policy_document" "audit_logs" {
     }
   }
 
-  dynamic "statement" {
-    for_each = module.cloudtrail.source_arn != null ? [1] : []
-    content {
-      sid    = "AWSCloudTrailAclCheck"
-      effect = "Allow"
+  statement {
+    sid    = "AWSCloudTrailAclCheck"
+    effect = "Allow"
 
-      principals {
-        type        = "Service"
-        identifiers = ["cloudtrail.amazonaws.com"]
-      }
+    principals {
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
 
-      actions   = ["s3:GetBucketAcl"]
-      resources = [aws_s3_bucket.audit_logs.arn]
+    actions   = ["s3:GetBucketAcl"]
+    resources = [aws_s3_bucket.audit_logs.arn]
 
-      condition {
-        test     = "StringEquals"
-        variable = "aws:SourceArn"
-        values   = [module.cloudtrail.source_arn]
-      }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [local.trail_arn]
     }
   }
 
-  dynamic "statement" {
-    for_each = module.cloudtrail.source_arn != null ? [1] : []
-    content {
-      sid    = "AWSCloudTrailWrite"
-      effect = "Allow"
+  statement {
+    sid    = "AWSCloudTrailWrite"
+    effect = "Allow"
 
-      principals {
-        type        = "Service"
-        identifiers = ["cloudtrail.amazonaws.com"]
-      }
+    principals {
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
 
-      actions   = ["s3:PutObject"]
-      resources = ["${aws_s3_bucket.audit_logs.arn}/cloudtrail/AWSLogs/${local.account_id}/*"]
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.audit_logs.arn}/cloudtrail/AWSLogs/${local.account_id}/*"]
 
-      condition {
-        test     = "StringEquals"
-        variable = "s3:x-amz-acl"
-        values   = ["bucket-owner-full-control"]
-      }
-
-      condition {
-        test     = "StringEquals"
-        variable = "aws:SourceArn"
-        values   = [module.cloudtrail.source_arn]
-      }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = [local.trail_arn]
     }
   }
 }
