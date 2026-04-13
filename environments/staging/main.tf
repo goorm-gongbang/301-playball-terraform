@@ -116,6 +116,9 @@ module "elasticache" {
   num_cache_clusters         = local.config.elasticache.num_cache_clusters
   transit_encryption_enabled = lookup(local.config.elasticache, "transit_encryption", false)
 
+  # Bastion에서 Redis 접근 허용
+  bastion_security_group_id = module.bastion.security_group_id
+
   depends_on = [module.vpc]
 }
 
@@ -150,6 +153,9 @@ module "rds" {
 
   # Connection pool size
   max_connections = lookup(local.config.rds, "max_connections", 100)
+
+  # Bastion에서 RDS 접근 허용
+  bastion_security_group_id = module.bastion.security_group_id
 
   depends_on = [module.vpc]
 }

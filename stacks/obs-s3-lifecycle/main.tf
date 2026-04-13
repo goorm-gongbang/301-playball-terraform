@@ -1,6 +1,7 @@
 #############################################
 # Observability S3 & Lifecycle
 # - Loki / Tempo / Thanos S3 buckets (staging + prod)
+# - AI Audit S3 buckets (staging + prod)
 # - S3 lifecycle policies
 #############################################
 
@@ -14,6 +15,8 @@ locals {
     "playball-prod-tempo"        = { environment = "prod", service = "tempo" }
     "playball-prod-thanos"       = { environment = "prod", service = "thanos" }
     "playball-prod-clickhouse"   = { environment = "prod", service = "clickhouse" }
+    "playball-staging-ai-audit"  = { environment = "staging", service = "ai-audit" }
+    "playball-prod-ai-audit"     = { environment = "prod", service = "ai-audit" }
   }
 
   lifecycle_config = {
@@ -54,6 +57,16 @@ locals {
     "playball-prod-clickhouse" = {
       rule_id         = "expiry-14days"
       expiration_days = 14
+    }
+    "playball-staging-ai-audit" = {
+      rule_id         = "expiry-14days"
+      expiration_days = 14
+    }
+    "playball-prod-ai-audit" = {
+      rule_id            = "expiry-90days"
+      expiration_days    = 90
+      transition_days    = 30
+      transition_storage = "GLACIER"
     }
   }
 }

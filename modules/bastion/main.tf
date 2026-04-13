@@ -141,7 +141,8 @@ yum update -y
 # DB 클라이언트 도구 (Developer용 RDS/Redis 접속)
 yum install -y jq
 yum install -y postgresql15 || yum install -y postgresql || true
-yum install -y redis6 || yum install -y redis || true
+dnf install -y redis6 || yum install -y redis6 || yum install -y redis || true
+ln -sf /usr/bin/redis6-cli /usr/bin/redis-cli 2>/dev/null || true
 
 # Prompt settings
 cat >> /etc/profile.d/prompt.sh << 'PROMPTEOF'
