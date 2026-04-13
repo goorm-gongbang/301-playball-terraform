@@ -1,53 +1,17 @@
-#############################################
-# Variables
-#############################################
-
 variable "domain_name" {
-  description = "Root domain name"
+  description = "Root domain"
   type        = string
-  default     = "goormgb.help"
+  default     = "playball.one"
 }
 
-variable "enable_acm" {
-  description = "ACM 인증서 생성 여부 (Porkbun NS 설정 후 true로 변경)"
-  type        = bool
-  default     = false
-}
-
-variable "staging_zone_name_servers" {
-  description = "Name servers for staging.goormgb.help zone (dns/staging에서 output 복사)"
-  type        = list(string)
-  default     = []
-}
-
-variable "prod_zone_name_servers" {
-  description = "Name servers for prod.goormgb.help zone"
-  type        = list(string)
-  default     = []
-}
-
-variable "pentest_zone_name_servers" {
-  description = "Name servers for pentest.goormgb.help zone (306-pen-testing에서 output 복사)"
-  type        = list(string)
-  default     = []
-}
-
-variable "loadtest_zone_name_servers" {
-  description = "Name servers for loadtest.goormgb.help zone (305-k6-operators에서 output 복사)"
-  type        = list(string)
-  default     = []
-}
-
-variable "vercel_ip" {
-  description = "Vercel A record IP for root domain"
+variable "environment" {
+  description = "Environment name (subdomain)"
   type        = string
-  default     = "216.198.79.1"
+  default     = "staging"
 }
 
-variable "netlify_guide_cname" {
-  description = "Netlify CNAME for guide subdomain"
+variable "alb_dns" {
+  description = "EKS ALB DNS name (CloudFront origin)"
   type        = string
-  default     = "playball-guide.netlify.app"
+  default     = "k8s-stagingalb-4f414fcf8f-1423406747.ap-northeast-2.elb.amazonaws.com"
 }
-
-# NOTE: prod_alb_dns → environments/prod/config.yaml로 이동됨

@@ -1,78 +1,40 @@
 #############################################
-# CloudFront - Assets CDN (공통)
-# assets.goormgb.help → S3 playball-assets
+# CloudFront - api.staging.playball.one → ALB
 #############################################
 
-data "aws_caller_identity" "current" {}
-
-# S3 Origin Access Control
-resource "aws_cloudfront_origin_access_control" "assets" {
-  count = var.enable_acm ? 1 : 0
-
-  name                              = "assets-oac"
-  description                       = "OAC for playball-assets S3 bucket"
-  origin_access_control_origin_type = "s3"
-  signing_behavior                  = "always"
-  signing_protocol                  = "sigv4"
-}
-
-# S3 Bucket Policy - CloudFront 접근 허용 (static 경로만)
-resource "aws_s3_bucket_policy" "assets" {
-  count  = var.enable_acm ? 1 : 0
-  bucket = "playball-assets"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowCloudFrontStaticAssets"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action = "s3:GetObject"
-        Resource = [
-          "arn:aws:s3:::playball-assets/static/*"
-        ]
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = aws_cloudfront_distribution.assets[0].arn
-          }
-        }
-      }
-    ]
-  })
-}
-
-# CloudFront Distribution
-resource "aws_cloudfront_distribution" "assets" {
-  count = var.enable_acm ? 1 : 0
-
-  enabled             = true
-  comment             = "Assets CDN - goormgb.help (shared)"
-  aliases             = ["assets.${var.domain_name}"]
-  price_class         = "PriceClass_200"
-  default_root_object = "index.html"
+resource "aws_cloudfront_distribution" "api" {
+  enabled         = true
+  comment         = "API CDN - api.${var.environment}.${var.domain_name}"
+  aliases         = ["api.${var.environment}.${var.domain_name}"]
+  price_class     = "PriceClass_200"
+  is_ipv6_enabled = true
 
   origin {
-    domain_name              = "playball-assets.s3.ap-northeast-2.amazonaws.com"
-    origin_id                = "s3-assets"
-    origin_access_control_id = aws_cloudfront_origin_access_control.assets[0].id
+    domain_name = var.alb_dns
+    origin_id   = "api-alb"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "s3-assets"
+    target_origin_id       = "api-alb"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
 
-    # 캐싱 최적화 (정적 파일)
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized
+    # API 는 pass-through
+    cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
+    origin_request_policy_id = "216adef6-5c7f-47e4-b989-5492eafa07d3" # AllViewer
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.wildcard_cloudfront[0].arn
+    acm_certificate_arn      = aws_acm_certificate.cloudfront.arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
@@ -84,32 +46,26 @@ resource "aws_cloudfront_distribution" "assets" {
   }
 
   tags = {
-    Name        = "assets-cloudfront"
-    Environment = "shared"
+    Name        = "api-${var.environment}-cloudfront"
+    Environment = var.environment
   }
 
-  depends_on = [aws_acm_certificate_validation.wildcard_cloudfront]
+  depends_on = [aws_acm_certificate_validation.cloudfront]
 }
 
 #############################################
-# Route53 Record - assets.goormgb.help
+# Route53 alias - api.staging.playball.one → CloudFront
+# (ca 계정 staging.playball.one zone 안에 생성)
 #############################################
 
-resource "aws_route53_record" "assets" {
-  count = var.enable_acm ? 1 : 0
-
-  zone_id = aws_route53_zone.root.zone_id
-  name    = "assets"
+resource "aws_route53_record" "api_alias" {
+  zone_id = aws_route53_zone.staging.zone_id
+  name    = "api.${var.environment}.${var.domain_name}"
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.assets[0].domain_name
-    zone_id                = aws_cloudfront_distribution.assets[0].hosted_zone_id
+    name                   = aws_cloudfront_distribution.api.domain_name
+    zone_id                = aws_cloudfront_distribution.api.hosted_zone_id
     evaluate_target_health = false
   }
 }
-
-# NOTE: Prod API CloudFront는 environments/prod/main.tf (module.cdn)으로 이동됨
-# state migration 필요: prod EKS 재기동 후
-#   terraform state mv 'aws_cloudfront_distribution.api[0]' → prod state
-#   terraform state mv 'aws_route53_record.api_cloudfront[0]' → prod state
