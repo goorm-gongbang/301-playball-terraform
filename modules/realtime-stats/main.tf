@@ -47,6 +47,7 @@ resource "aws_cloudfront_realtime_log_config" "main" {
     "sc-bytes",
     "time-taken",
     "cs-user-agent",
+    "cs-headers", # DEMO_MODE 에서 X-Client-IP 등 헤더 기반 IP 집계용 (Lambda parse)
   ]
 
   endpoint {
@@ -111,6 +112,9 @@ resource "aws_lambda_function" "realtime_stats" {
       RATIO_SINGLE_IP_ATTACK = tostring(var.ratio_single_ip_attack)
       RATIO_BOTNET_ATTACK    = tostring(var.ratio_botnet_attack)
       MIN_REQUESTS_FOR_RATIO = tostring(var.min_requests_for_ratio)
+      # Demo mode: on 이면 X-Client-IP 헤더로 카운트 (AWS 콘솔에서 토글)
+      DEMO_MODE      = tostring(var.demo_mode)
+      DEMO_IP_HEADER = var.demo_ip_header
     }
   }
 

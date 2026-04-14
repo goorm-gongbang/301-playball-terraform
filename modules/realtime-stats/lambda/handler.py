@@ -31,6 +31,11 @@ RATIO_SINGLE_IP_ATTACK = float(os.environ.get("RATIO_SINGLE_IP_ATTACK", "50"))
 RATIO_BOTNET_ATTACK = float(os.environ.get("RATIO_BOTNET_ATTACK", "1.2"))
 MIN_REQUESTS_FOR_RATIO = int(os.environ.get("MIN_REQUESTS_FOR_RATIO", "500"))
 
+# Demo mode: X-Client-IP 등 특정 헤더를 클라이언트 IP 로 간주해 집계
+# (k6 매크로로 유니크 IP 다양성을 시뮬레이션할 때만 사용. 운영 시 false 유지)
+DEMO_MODE = os.environ.get("DEMO_MODE", "false").lower() == "true"
+DEMO_IP_HEADER = os.environ.get("DEMO_IP_HEADER", "x-client-ip").lower()
+
 # HyperLogLog 키 TTL (초)
 TTL_MINUTE = 300
 TTL_HOUR = 7200
@@ -56,19 +61,56 @@ def is_internal(ip):
     return any(ip.startswith(p) for p in INTERNAL_PREFIXES)
 
 
+def _extract_header(headers_blob, name):
+    """cs-headers 필드(헤더들을 CRLF/%0D%0A 로 concat 한 문자열)에서 특정 헤더 값을 뽑는다."""
+    if not headers_blob:
+        return None
+    # CloudFront RT 로그는 헤더를 URL-encoded 로 보냄 (%0D%0A = \r\n, %20 = space)
+    # 대소문자 무시하고 찾는다
+    lower = headers_blob.lower()
+    key = name.lower() + "%3a"  # "x-client-ip:" (URL-encoded colon)
+    idx = lower.find(key)
+    if idx < 0:
+        # 일부 구현은 colon 을 encode 안 함
+        key2 = name.lower() + ":"
+        idx = lower.find(key2)
+        if idx < 0:
+            return None
+        value_start = idx + len(key2)
+    else:
+        value_start = idx + len(key)
+    # CRLF(URL-encoded %0D%0A) 까지가 헤더 값
+    end = headers_blob.find("%0D%0A", value_start)
+    if end < 0:
+        end = len(headers_blob)
+    # URL decode (공백만: %20)
+    value = headers_blob[value_start:end].replace("%20", "").strip()
+    return value or None
+
+
 def parse_cloudfront_log(data):
-    """CloudFront RT 로그 필드 파싱 (탭 구분)."""
+    """CloudFront RT 로그 필드 파싱 (탭 구분).
+
+    필드 순서는 terraform aws_cloudfront_realtime_log_config.main.fields 와 1:1.
+    """
     fields = data.split("\t")
     if len(fields) < 4:
         return None
-    return {
+    parsed = {
         "timestamp": fields[0],
         "client_ip": fields[1] if len(fields) > 1 else None,
         "method": fields[2] if len(fields) > 2 else None,
         "uri": fields[3] if len(fields) > 3 else None,
         "status": fields[5] if len(fields) > 5 else None,
         "user_agent": fields[8] if len(fields) > 8 else None,
+        "headers": fields[9] if len(fields) > 9 else None,
     }
+    # DEMO_MODE 일 때만 헤더에서 가짜 IP 추출을 시도하고, 있으면 client_ip 대체
+    if DEMO_MODE and parsed["headers"]:
+        demo_ip = _extract_header(parsed["headers"], DEMO_IP_HEADER)
+        if demo_ip:
+            parsed["client_ip"] = demo_ip
+    return parsed
 
 
 def handler(event, context):

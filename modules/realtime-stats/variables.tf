@@ -106,3 +106,20 @@ variable "min_requests_for_ratio" {
   type        = number
   default     = 500
 }
+
+#############################################
+# Demo Mode (k6 매크로로 유니크 IP 시뮬레이션)
+# 콘솔에서 Lambda env 토글만으로 on/off 가능 (재배포 불필요)
+#############################################
+
+variable "demo_mode" {
+  description = "true 로 두면 Lambda 가 DEMO_IP_HEADER(기본 x-client-ip) 값을 클라이언트 IP 로 간주해 집계. 운영 시 false 유지."
+  type        = bool
+  default     = false
+}
+
+variable "demo_ip_header" {
+  description = "Demo 모드에서 읽을 헤더 이름 (소문자 기준)"
+  type        = string
+  default     = "x-client-ip"
+}
