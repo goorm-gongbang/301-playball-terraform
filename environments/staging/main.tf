@@ -326,6 +326,7 @@ resource "aws_secretsmanager_secret_version" "ai_service_common" {
     ch_password      = ""
     AUTH_GUARD_URL   = "http://auth-guard.staging-webs.svc.cluster.local:8080/auth"
     INTERNAL_API_KEY = ""
+    TM_ROLLOUT_SALT  = "CHANGE_ME_IN_CONSOLE"
   })
 
   lifecycle { ignore_changes = [secret_string] }
