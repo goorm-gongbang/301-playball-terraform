@@ -272,7 +272,7 @@ resource "aws_launch_template" "apps" {
 
 resource "aws_eks_node_group" "infra" {
   cluster_name    = module.eks.cluster_name
-  node_group_name = var.owner_name != "" ? "${var.owner_name}-infra-ng" : "infra-ng"
+  node_group_name_prefix = var.owner_name != "" ? "${var.owner_name}-infra-ng-" : "infra-ng-"
   node_role_arn   = aws_iam_role.node_infra.arn
   subnet_ids      = var.private_subnet_ids
 
@@ -387,7 +387,7 @@ resource "aws_iam_role_policy_attachment" "node_monitoring_ssm" {
 
 resource "aws_eks_node_group" "monitoring" {
   cluster_name    = module.eks.cluster_name
-  node_group_name = var.owner_name != "" ? "${var.owner_name}-monitoring-ng" : "monitoring-ng"
+  node_group_name_prefix = var.owner_name != "" ? "${var.owner_name}-monitoring-ng-" : "monitoring-ng-"
   node_role_arn   = aws_iam_role.node_monitoring.arn
   subnet_ids      = var.private_subnet_ids
 
@@ -501,7 +501,7 @@ resource "aws_iam_role_policy_attachment" "node_apps_ssm" {
 
 resource "aws_eks_node_group" "apps" {
   cluster_name    = module.eks.cluster_name
-  node_group_name = "${var.owner_name}-${var.environment}-apps-ng"
+  node_group_name_prefix = "${var.owner_name}-${var.environment}-apps-ng-"
   node_role_arn   = aws_iam_role.node_apps.arn
   subnet_ids      = var.private_subnet_ids
 
