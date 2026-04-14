@@ -7,10 +7,10 @@
 #############################################
 
 locals {
-  project_name   = "playball"
-  aws_region     = "ap-northeast-2"
-  account_id     = data.aws_caller_identity.current.account_id
-  trail_arn      = "arn:aws:cloudtrail:${local.aws_region}:${local.account_id}:trail/${local.project_name}-audit-trail"
+  project_name = "playball"
+  aws_region   = "ap-northeast-2"
+  account_id   = data.aws_caller_identity.current.account_id
+  trail_arn    = "arn:aws:cloudtrail:${local.aws_region}:${local.account_id}:trail/${local.project_name}-audit-trail"
 }
 
 #############################################
@@ -262,6 +262,24 @@ module "secret_change_events" {
 }
 
 #############################################
+# Spot Interruption Events (EventBridge → Lambda → Discord)
+#############################################
+
+module "spot_interruption_events" {
+  source = "../../modules/spot-interruption-events"
+
+  project_name = local.project_name
+  aws_region   = local.aws_region
+  account_id   = local.account_id
+  enabled      = true
+
+  cluster_name        = "goormgb-staging-eks"
+  discord_username    = "playball-spot-bot"
+  mention_text        = ""
+  discord_webhook_url = "https://discord.com/api/webhooks/1484105176867536988/N3C_085Bf_sPF57n8mggbDIW8DDhGmJkcmN8O1jhoH5FNAS-0KjhgDOX5DZLNqdXdq2S"
+}
+
+#############################################
 # Outputs
 #############################################
 
@@ -287,4 +305,8 @@ output "audit_events_lambda_name" {
 
 output "secret_change_events_lambda_name" {
   value = module.secret_change_events.lambda_name
+}
+
+output "spot_interruption_events_lambda_name" {
+  value = module.spot_interruption_events.lambda_name
 }

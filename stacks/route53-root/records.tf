@@ -46,6 +46,18 @@ resource "aws_route53_record" "www" {
 }
 
 #############################################
+# docs.playball.one → Vercel
+#############################################
+
+resource "aws_route53_record" "docs" {
+  zone_id = aws_route53_zone.root.zone_id
+  name    = "docs.${var.domain_name}"
+  type    = "CNAME"
+  ttl     = var.default_ttl
+  records = [var.vercel_cname_target]
+}
+
+#############################################
 # guide.playball.one → Netlify
 #############################################
 
