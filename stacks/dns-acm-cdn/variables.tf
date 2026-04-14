@@ -15,3 +15,9 @@ variable "alb_dns" {
   type        = string
   default     = "k8s-stagingalb-4f414fcf8f-1423406747.ap-northeast-2.elb.amazonaws.com"
 }
+
+variable "realtime_log_config_arn" {
+  description = "CloudFront Realtime Log Config ARN (environments/staging output에서 -var 로 주입). 미지정 시 RT 로그 비활성."
+  type        = string
+  default     = null
+}

@@ -137,7 +137,7 @@ resource "aws_lambda_event_source_mapping" "kinesis" {
 
 resource "aws_security_group" "lambda" {
   name_prefix = "${local.name_prefix}-realtime-stats-"
-  description = "Lambda realtime-stats → Redis"
+  description = "Lambda realtime-stats to Redis"
   vpc_id      = var.vpc_id
 
   egress {

@@ -31,6 +31,9 @@ resource "aws_cloudfront_distribution" "api" {
     # API 는 pass-through
     cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
     origin_request_policy_id = "216adef6-5c7f-47e4-b989-5492eafa07d3" # AllViewer
+
+    # Realtime Log → Kinesis (environments/staging 의 realtime_stats 모듈 output)
+    realtime_log_config_arn = var.realtime_log_config_arn
   }
 
   viewer_certificate {

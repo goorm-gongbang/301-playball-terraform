@@ -10,7 +10,7 @@ BUILD_DIR="${LAYER_DIR}/python"
 rm -rf "${BUILD_DIR}"
 mkdir -p "${BUILD_DIR}"
 
-pip install redis -t "${BUILD_DIR}" --quiet --platform manylinux2014_aarch64 --only-binary=:all:
+python3 -m pip install redis -t "${BUILD_DIR}" --quiet --platform manylinux2014_aarch64 --only-binary=:all:
 
 cd "${LAYER_DIR}"
 rm -f redis-layer.zip

@@ -185,34 +185,36 @@ module "karpenter" {
 # # Lambda Layer 빌드 후 주석 해제: modules/realtime-stats/layers/build.sh
 # #############################################
 #
-# module "realtime_stats" {
-#   count  = local.config.realtime_stats.enabled ? 1 : 0
-#   source = "../../modules/realtime-stats"
-#
-#   environment = local.env
-#   owner_name  = local.owner
-#
-#   vpc_id             = module.vpc.vpc_id
-#   vpc_cidr           = local.config.vpc.cidr
-#   private_subnet_ids = module.vpc.private_subnet_ids
-#
-#   redis_host              = module.elasticache.redis_endpoint
-#   redis_port              = 6379
-#   redis_tls               = lookup(local.config.elasticache, "transit_encryption", false)
-#   redis_security_group_id = module.elasticache.security_group_id
-#
-#   cloudfront_distribution_id = module.cdn.cloudfront_id
-#   sampling_rate              = local.config.realtime_stats.sampling_rate
-#
-#   # 봇 탐지 / ratio 분석 임계치
-#   bot_req_threshold      = lookup(local.config.realtime_stats, "bot_req_threshold", 200)
-#   bot_blocklist_ttl      = lookup(local.config.realtime_stats, "bot_blocklist_ttl", 3600)
-#   ratio_single_ip_attack = lookup(local.config.realtime_stats, "ratio_single_ip_attack", 50)
-#   ratio_botnet_attack    = lookup(local.config.realtime_stats, "ratio_botnet_attack", 1.2)
-#   min_requests_for_ratio = lookup(local.config.realtime_stats, "min_requests_for_ratio", 500)
-#
-#   depends_on = [module.cdn, module.elasticache]
-# }
+module "realtime_stats" {
+  count  = local.config.realtime_stats.enabled ? 1 : 0
+  source = "../../modules/realtime-stats"
+
+  environment = local.env
+  owner_name  = local.owner
+
+  vpc_id             = module.vpc.vpc_id
+  vpc_cidr           = local.config.vpc.cidr
+  private_subnet_ids = module.vpc.private_subnet_ids
+
+  redis_host              = module.elasticache.redis_endpoint
+  redis_port              = 6379
+  redis_tls               = lookup(local.config.elasticache, "transit_encryption", false)
+  redis_security_group_id = module.elasticache.security_group_id
+
+  # CloudFront distribution 은 stacks/dns-acm-cdn 에서 관리. RT log config attach 도 거기서.
+  # 모듈 변수는 정의되어 있으나 내부에서 사용하지 않으므로 placeholder 전달.
+  cloudfront_distribution_id = "managed-by-dns-acm-cdn-stack"
+  sampling_rate              = local.config.realtime_stats.sampling_rate
+
+  # 봇 탐지 / ratio 분석 임계치
+  bot_req_threshold      = lookup(local.config.realtime_stats, "bot_req_threshold", 200)
+  bot_blocklist_ttl      = lookup(local.config.realtime_stats, "bot_blocklist_ttl", 3600)
+  ratio_single_ip_attack = lookup(local.config.realtime_stats, "ratio_single_ip_attack", 50)
+  ratio_botnet_attack    = lookup(local.config.realtime_stats, "ratio_botnet_attack", 1.2)
+  min_requests_for_ratio = lookup(local.config.realtime_stats, "min_requests_for_ratio", 500)
+
+  depends_on = [module.elasticache]
+}
 
 #############################################
 # Ops Alerting (CloudWatch → Discord)

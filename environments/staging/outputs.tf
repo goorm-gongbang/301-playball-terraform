@@ -184,3 +184,22 @@ output "security_summary" {
     bastion_ssh        = "비활성화 (SSM 전용)"
   }
 }
+
+#############################################
+# Realtime Stats (CloudFront RT Log → Kinesis → Lambda → Redis)
+#############################################
+
+output "realtime_log_config_arn" {
+  description = "CloudFront Realtime Log Config ARN — dns-acm-cdn stack 의 distribution 에 연결할 값"
+  value       = try(module.realtime_stats[0].realtime_log_config_arn, null)
+}
+
+output "realtime_kinesis_stream_arn" {
+  description = "Kinesis Data Stream ARN (CloudFront → Lambda)"
+  value       = try(module.realtime_stats[0].kinesis_stream_arn, null)
+}
+
+output "realtime_lambda_function_name" {
+  description = "Realtime stats Lambda function name"
+  value       = try(module.realtime_stats[0].lambda_function_name, null)
+}
