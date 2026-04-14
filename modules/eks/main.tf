@@ -272,7 +272,9 @@ resource "aws_launch_template" "apps" {
 
 resource "aws_eks_node_group" "infra" {
   cluster_name    = module.eks.cluster_name
-  node_group_name_prefix = var.owner_name != "" ? "${var.owner_name}-infra-ng-" : "infra-ng-"
+  # infra 노드그룹은 stateful workload(clickhouse, kafka)가 상주하고 ON_DEMAND 라
+  # flap 거의 없음. 교체가 꼭 필요한 순간에만 수동 조치 (prefix 미전환 유지).
+  node_group_name = var.owner_name != "" ? "${var.owner_name}-infra-ng" : "infra-ng"
   node_role_arn   = aws_iam_role.node_infra.arn
   subnet_ids      = var.private_subnet_ids
 
