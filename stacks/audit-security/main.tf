@@ -11,6 +11,23 @@ locals {
   aws_region   = "ap-northeast-2"
   account_id   = data.aws_caller_identity.current.account_id
   trail_arn    = "arn:aws:cloudtrail:${local.aws_region}:${local.account_id}:trail/${local.project_name}-audit-trail"
+  monitored_bucket_names = [
+    aws_s3_bucket.audit_logs.id,
+    "playball-web-backup",
+    "playball-retention-archive",
+    "playball-tfstate",
+    "playball-staging-loki",
+    "playball-staging-tempo",
+    "playball-staging-thanos",
+    "playball-prod-loki",
+    "playball-prod-tempo",
+    "playball-prod-thanos",
+    "playball-staging-ai-audit",
+    "playball-prod-ai-audit",
+    "playball-staging-clickhouse",
+    "playball-prod-clickhouse"
+  ]
+  tracked_s3_bucket_arns = [for name in local.monitored_bucket_names : "arn:aws:s3:::${name}"]
 }
 
 #############################################
@@ -28,9 +45,7 @@ module "cloudtrail" {
   s3_key_prefix        = "cloudtrail"
   log_retention_days   = 90
 
-  tracked_s3_bucket_arns = [
-    aws_s3_bucket.audit_logs.arn
-  ]
+  tracked_s3_bucket_arns = local.tracked_s3_bucket_arns
 }
 
 resource "aws_s3_bucket" "audit_logs" {
@@ -231,13 +246,7 @@ module "audit_events" {
   audit_logs_bucket_arn = aws_s3_bucket.audit_logs.arn
   summary_prefix        = "lifecycle-expiration-summary"
 
-  monitored_bucket_names = [
-    "playball-web-backup",
-    "playball-cloudtrail-audit",
-    "playball-retention-archive",
-    "playball-ai-data",
-    "playball-ai-backup"
-  ]
+  monitored_bucket_names = local.monitored_bucket_names
 
   discord_secret_name   = "staging/monitoring/discord-webhook-alerts"
   discord_username      = "playball-audit-bot"
