@@ -228,7 +228,7 @@ module "ops_alerting" {
   aws_region  = local.region
   account_id  = data.aws_caller_identity.current.account_id
 
-  discord_secret_name   = "${local.env}/monitoring/discord-webhook-alerts"
+  discord_secret_name   = "${local.env}/monitoring"
   critical_mention_text = "@개발팀 @admins"
 
   redis_cache_cluster_id = "${local.owner}-${local.env}-redis-001"

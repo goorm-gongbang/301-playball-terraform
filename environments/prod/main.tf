@@ -182,11 +182,11 @@ module "ops_alerting" {
   aws_region  = local.region
   account_id  = local.account_id
 
-  discord_secret_name   = "${local.env}/monitoring/discord-webhook-alerts"
+  discord_secret_name   = "${local.env}/monitoring"
   critical_mention_text = "@개발팀 @admins"
 
   redis_cache_cluster_id = "${local.owner}-${local.env}-redis-001"
-  alarms_enabled         = true
+  alarms_enabled         = lookup(local.config, "ops_alerting_enabled", true)
 
   rds_instance_identifier = module.rds.identifier
   backup_s3_bucket        = "playball-web-backup"
