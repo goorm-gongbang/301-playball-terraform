@@ -97,7 +97,7 @@ def _classify_severity(record):
     bucket_name = record.get("bucket_name")
 
     if event_name in {"DeleteObject", "DeleteObjects"}:
-        if bucket_name == "goormgb-audit-logs":
+        if bucket_name and bucket_name.endswith("-audit-logs"):
             return "critical"
         return "warning"
 
