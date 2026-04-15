@@ -11,8 +11,12 @@ secretsmanager = boto3.client("secretsmanager")
 
 
 def _post_to_discord(webhook_url, username, payload):
+    normalized_url = webhook_url.strip()
+    if normalized_url.endswith("/slack"):
+        normalized_url = normalized_url[: -len("/slack")]
+
     req = request.Request(
-        webhook_url.strip(),
+        normalized_url,
         data=json.dumps(payload).encode("utf-8"),
         headers={
             "Content-Type": "application/json",
@@ -75,21 +79,52 @@ def _user_identity(detail):
     return user.get("principalId") or user.get("type") or "unknown"
 
 
-def _resolve_webhook(secret_name):
+def _event_severity(event_name):
+    if event_name == "DeleteSecret":
+        return "warning"
+    return "info"
+
+
+def _get_discord_secret():
+    secret_name = os.environ.get("DISCORD_SECRET_NAME", "").strip()
+    if not secret_name:
+        return {}
+
+    resp = secretsmanager.get_secret_value(SecretId=secret_name)
+    return json.loads(resp.get("SecretString", "{}"))
+
+
+def _resolve_webhook(secret_name, event_name):
     """Route to the correct Discord webhook based on secret name prefix."""
     staging_webhook = os.environ.get("STAGING_DISCORD_WEBHOOK_URL", "").strip()
     dev_webhook = os.environ.get("DEV_DISCORD_WEBHOOK_URL", "").strip()
+    severity = _event_severity(event_name)
+    discord_secret = _get_discord_secret()
+
+    def _select_key(env_prefix):
+        if env_prefix == "dev/":
+            return os.environ.get(
+                "DEV_WARNING_WEBHOOK_KEY" if severity == "warning" else "DEV_INFO_WEBHOOK_KEY",
+                "warningWebhookUrl" if severity == "warning" else "infoWebhookUrl",
+            )
+        return os.environ.get(
+            "STAGING_WARNING_WEBHOOK_KEY" if severity == "warning" else "STAGING_INFO_WEBHOOK_KEY",
+            "securityWarningWebhookUrl" if severity == "warning" else "securityInfoWebhookUrl",
+        )
 
     if secret_name.startswith("prod/"):
-        # prod uses staging channel for now (same infra team)
-        return staging_webhook
+        key = _select_key("prod/")
+        return (discord_secret.get(key) or staging_webhook).strip()
     if secret_name.startswith("staging/"):
-        return staging_webhook
+        key = _select_key("staging/")
+        return (discord_secret.get(key) or staging_webhook).strip()
     if secret_name.startswith("dev/"):
-        return dev_webhook
+        key = _select_key("dev/")
+        return (discord_secret.get(key) or dev_webhook).strip()
 
     # Fallback: staging
-    return staging_webhook
+    key = _select_key("staging/")
+    return (discord_secret.get(key) or staging_webhook).strip()
 
 
 def _event_action_label(event_name):
@@ -118,7 +153,7 @@ def lambda_handler(event, context):
     if invoking_service == "secretsmanager.amazonaws.com":
         return {"statusCode": 200, "delivery": "ignored", "reason": "rotation"}
 
-    webhook_url = _resolve_webhook(secret_id)
+    webhook_url = _resolve_webhook(secret_id, event_name)
     if not webhook_url:
         print(f"No webhook URL for secret: {secret_id}")
         return {"statusCode": 200, "delivery": "skipped"}

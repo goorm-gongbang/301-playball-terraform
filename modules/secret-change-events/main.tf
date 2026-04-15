@@ -51,6 +51,12 @@ resource "aws_iam_role_policy" "lambda" {
         Effect   = "Allow"
         Action   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
         Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.account_id}:secret:*"
+      },
+      {
+        Sid      = "AllowReadDiscordWebhookSecret"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:GetSecretValue"]
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.account_id}:secret:${var.discord_secret_name}*"
       }
     ]
   })
@@ -72,6 +78,11 @@ resource "aws_lambda_function" "this" {
       STAGING_DISCORD_WEBHOOK_URL = var.staging_discord_webhook_url
       DEV_DISCORD_WEBHOOK_URL     = var.dev_discord_webhook_url
       DISCORD_WEBHOOK_USERNAME    = var.discord_username
+      DISCORD_SECRET_NAME         = var.discord_secret_name
+      STAGING_WARNING_WEBHOOK_KEY = var.staging_warning_webhook_key
+      STAGING_INFO_WEBHOOK_KEY    = var.staging_info_webhook_key
+      DEV_WARNING_WEBHOOK_KEY     = var.dev_warning_webhook_key
+      DEV_INFO_WEBHOOK_KEY        = var.dev_info_webhook_key
     }
   }
 

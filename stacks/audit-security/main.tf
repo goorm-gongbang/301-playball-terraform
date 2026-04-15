@@ -225,7 +225,7 @@ module "security_events" {
   account_id   = local.account_id
   enabled      = true
 
-  discord_secret_name   = "staging/monitoring/discord-webhook-alerts"
+  discord_secret_name   = "staging/monitoring"
   discord_username      = "playball-security-bot"
   critical_mention_text = "@개발팀 @admins"
 }
@@ -248,7 +248,7 @@ module "audit_events" {
 
   monitored_bucket_names = local.monitored_bucket_names
 
-  discord_secret_name   = "staging/monitoring/discord-webhook-alerts"
+  discord_secret_name   = "staging/monitoring"
   discord_username      = "playball-audit-bot"
   critical_mention_text = "@개발팀 @admins"
 }
@@ -267,6 +267,11 @@ module "secret_change_events" {
 
   staging_discord_webhook_url = var.secret_change_staging_discord_webhook_url
   dev_discord_webhook_url     = var.secret_change_dev_discord_webhook_url
+  discord_secret_name         = "staging/monitoring"
+  staging_warning_webhook_key = "securityWarningWebhookUrl"
+  staging_info_webhook_key    = "securityInfoWebhookUrl"
+  dev_warning_webhook_key     = "warningWebhookUrl"
+  dev_info_webhook_key        = "infoWebhookUrl"
   discord_username            = "playball-secret-bot"
 }
 
