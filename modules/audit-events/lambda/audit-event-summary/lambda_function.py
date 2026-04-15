@@ -10,6 +10,17 @@ import boto3
 
 s3 = boto3.client("s3")
 secretsmanager = boto3.client("secretsmanager")
+TEST_MARKERS = ("test/", "test-", "-test", "/test-")
+
+
+def _is_test_record(record):
+    values = [
+        record.get("bucket_name"),
+        record.get("object_key"),
+        record.get("event_name"),
+    ]
+    lowered = " ".join(str(value or "").lower() for value in values)
+    return any(marker in lowered for marker in TEST_MARKERS)
 
 
 def _parse_event_time(event):
@@ -22,6 +33,7 @@ def _parse_event_time(event):
 
 def _post_to_discord(webhook_url, username, record):
     severity = record.get("severity", "info")
+    prefix = "[TEST] " if _is_test_record(record) else ""
     critical_mention_text = os.environ.get("CRITICAL_MENTION_TEXT", "").strip()
     color = {
         "critical": 15158332,
@@ -38,7 +50,7 @@ def _post_to_discord(webhook_url, username, record):
         "username": username,
         "embeds": [
             {
-                "title": f"{emoji} AWS 감사 이벤트 - {record['event_name']}",
+                "title": f"{emoji} {prefix}AWS 감사 이벤트 - {record['event_name']}",
                 "color": color,
                 "fields": [
                     {"name": "버킷", "value": record.get("bucket_name") or "-", "inline": True},

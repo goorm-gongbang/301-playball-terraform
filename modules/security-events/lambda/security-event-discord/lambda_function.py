@@ -9,6 +9,7 @@ import boto3
 
 KST = timezone(timedelta(hours=9))
 secretsmanager = boto3.client("secretsmanager")
+TEST_MARKERS = ("test/", "test-", "-test", "/test-")
 
 SENSITIVE_PORTS = {
     int(p.strip())
@@ -52,6 +53,23 @@ def _resolve_webhook_url(severity):
         return (secret.get(key_name) or "").strip()
 
     return os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
+
+
+def _is_test_event(detail):
+    request_parameters = detail.get("requestParameters", {}) or {}
+    values = [
+        detail.get("eventName"),
+        request_parameters.get("groupId"),
+        request_parameters.get("trailName"),
+        request_parameters.get("userName"),
+        request_parameters.get("roleName"),
+        request_parameters.get("bucketName"),
+        request_parameters.get("dBInstanceIdentifier"),
+        request_parameters.get("dBSnapshotIdentifier"),
+        request_parameters.get("resourceArn"),
+    ]
+    lowered = " ".join(str(value or "").lower() for value in values)
+    return any(marker in lowered for marker in TEST_MARKERS)
 
 
 def _format_kst(raw_time):
@@ -212,6 +230,7 @@ def lambda_handler(event, context):
     source_ip = detail.get("sourceIPAddress", "unknown")
     actor = _user_identity(detail)
     title, severity = _classify_event(detail_type, detail)
+    test_prefix = "[TEST] " if _is_test_event(detail) else ""
 
     if not title:
         return {"statusCode": 200, "delivery": "ignored", "eventName": event_name}
@@ -271,7 +290,7 @@ def lambda_handler(event, context):
         "username": username,
         "embeds": [
             {
-                "title": f"🚨 AWS 보안 알림 - {title}",
+                "title": f"🚨 {test_prefix}AWS 보안 알림 - {title}",
                 "color": 15158332,
                 "fields": fields,
                 "footer": {"text": "goormgb AWS Security Event Alert"},

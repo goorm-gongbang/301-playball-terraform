@@ -8,6 +8,7 @@ import boto3
 
 KST = timezone(timedelta(hours=9))
 secretsmanager = boto3.client("secretsmanager")
+TEST_MARKERS = ("test/", "test-", "-test", "/test-")
 
 
 def _post_to_discord(webhook_url, username, payload):
@@ -127,6 +128,11 @@ def _resolve_webhook(secret_name, event_name):
     return (discord_secret.get(key) or staging_webhook).strip()
 
 
+def _is_test_secret(secret_id):
+    lowered = str(secret_id or "").lower()
+    return any(marker in lowered for marker in TEST_MARKERS)
+
+
 def _event_action_label(event_name):
     return {
         "PutSecretValue": "값 변경",
@@ -159,6 +165,7 @@ def lambda_handler(event, context):
         return {"statusCode": 200, "delivery": "skipped"}
 
     action_label = _event_action_label(event_name)
+    test_prefix = "[TEST] " if _is_test_secret(secret_id) else ""
     action_emoji = {
         "PutSecretValue": "\U0001f510",
         "UpdateSecret": "\u2699\ufe0f",
@@ -185,7 +192,7 @@ def lambda_handler(event, context):
         "username": username,
         "embeds": [
             {
-                "title": f"{action_emoji} Secret {action_label}",
+                "title": f"{action_emoji} {test_prefix}Secret {action_label}",
                 "description": "\n".join(description_parts),
                 "color": {
                     "PutSecretValue": 16750848,  # orange
