@@ -35,8 +35,20 @@ variable "summary_prefix" {
   default     = "lifecycle-expiration-summary"
 }
 
+variable "rollup_report_prefix" {
+  description = "S3 prefix for aggregated audit rollup markers"
+  type        = string
+  default     = "audit-reports/observability-delete-rollup"
+}
+
 variable "monitored_bucket_names" {
   description = "S3 bucket names to monitor for delete events"
+  type        = list(string)
+  default     = []
+}
+
+variable "observability_bucket_names" {
+  description = "Observability S3 bucket names to aggregate for delete events"
   type        = list(string)
   default     = []
 }
@@ -51,6 +63,12 @@ variable "lambda_timeout" {
   description = "Lambda timeout in seconds"
   type        = number
   default     = 30
+}
+
+variable "rollup_schedule_expression" {
+  description = "EventBridge schedule expression for observability delete rollups"
+  type        = string
+  default     = "cron(5 * * * ? *)"
 }
 
 variable "discord_webhook_url" {

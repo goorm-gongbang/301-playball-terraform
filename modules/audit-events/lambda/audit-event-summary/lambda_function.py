@@ -11,6 +11,7 @@ import boto3
 s3 = boto3.client("s3")
 secretsmanager = boto3.client("secretsmanager")
 TEST_MARKERS = ("test/", "test-", "-test", "/test-")
+OBSERVABILITY_SUFFIXES = ("-loki", "-tempo", "-thanos")
 
 
 def _is_test_record(record):
@@ -104,7 +105,15 @@ def _classify_severity(record):
     return "info"
 
 
+def _is_observability_delete(record):
+    event_name = record.get("event_name")
+    bucket_name = record.get("bucket_name") or ""
+    return event_name in {"DeleteObject", "DeleteObjects"} and bucket_name.endswith(OBSERVABILITY_SUFFIXES)
+
+
 def _should_notify(record):
+    if _is_observability_delete(record):
+        return False
     return _classify_severity(record) in {"warning", "critical"}
 
 

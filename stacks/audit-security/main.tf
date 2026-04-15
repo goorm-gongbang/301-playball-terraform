@@ -27,6 +27,14 @@ locals {
     "playball-staging-clickhouse",
     "playball-prod-clickhouse"
   ]
+  observability_bucket_names = [
+    "playball-staging-loki",
+    "playball-staging-tempo",
+    "playball-staging-thanos",
+    "playball-prod-loki",
+    "playball-prod-tempo",
+    "playball-prod-thanos",
+  ]
   tracked_s3_bucket_arns = [for name in local.monitored_bucket_names : "arn:aws:s3:::${name}"]
 }
 
@@ -246,7 +254,8 @@ module "audit_events" {
   audit_logs_bucket_arn = aws_s3_bucket.audit_logs.arn
   summary_prefix        = "lifecycle-expiration-summary"
 
-  monitored_bucket_names = local.monitored_bucket_names
+  monitored_bucket_names     = local.monitored_bucket_names
+  observability_bucket_names = local.observability_bucket_names
 
   discord_secret_name   = var.monitoring_secret_name
   discord_username      = "playball-audit-bot"
