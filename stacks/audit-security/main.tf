@@ -225,9 +225,9 @@ module "security_events" {
   account_id   = local.account_id
   enabled      = true
 
-  discord_secret_name   = "staging/monitoring"
+  discord_secret_name   = var.monitoring_secret_name
   discord_username      = "playball-security-bot"
-  critical_mention_text = "@개발팀 @admins"
+  critical_mention_text = var.critical_mention_text
 }
 
 #############################################
@@ -248,9 +248,9 @@ module "audit_events" {
 
   monitored_bucket_names = local.monitored_bucket_names
 
-  discord_secret_name   = "staging/monitoring"
+  discord_secret_name   = var.monitoring_secret_name
   discord_username      = "playball-audit-bot"
-  critical_mention_text = "@개발팀 @admins"
+  critical_mention_text = var.critical_mention_text
 }
 
 #############################################
@@ -267,7 +267,7 @@ module "secret_change_events" {
 
   staging_discord_webhook_url = var.secret_change_staging_discord_webhook_url
   dev_discord_webhook_url     = var.secret_change_dev_discord_webhook_url
-  discord_secret_name         = "staging/monitoring"
+  discord_secret_name         = var.monitoring_secret_name
   staging_warning_webhook_key = "securityWarningWebhookUrl"
   staging_info_webhook_key    = "securityInfoWebhookUrl"
   dev_warning_webhook_key     = "warningWebhookUrl"
@@ -287,7 +287,7 @@ module "spot_interruption_events" {
   account_id   = local.account_id
   enabled      = true
 
-  cluster_name        = "goormgb-staging-eks"
+  cluster_name        = var.cluster_name
   discord_username    = "playball-spot-bot"
   mention_text        = ""
   discord_webhook_url = "https://discord.com/api/webhooks/1484105176867536988/N3C_085Bf_sPF57n8mggbDIW8DDhGmJkcmN8O1jhoH5FNAS-0KjhgDOX5DZLNqdXdq2S"
