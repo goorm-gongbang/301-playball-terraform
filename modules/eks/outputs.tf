@@ -104,6 +104,11 @@ output "rds_backup_irsa_role_arn" {
   value       = module.rds_backup_irsa.iam_role_arn
 }
 
+output "logs_backup_irsa_role_arn" {
+  description = "Logs Backup IRSA role ARN"
+  value       = module.logs_backup_irsa.iam_role_arn
+}
+
 output "ai_defense_irsa_role_arn" {
   description = "AI Defense IRSA role ARN (S3 audit archive)"
   value       = module.ai_defense_irsa.iam_role_arn
