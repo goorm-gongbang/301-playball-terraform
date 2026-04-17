@@ -115,3 +115,61 @@ resource "aws_ssoadmin_account_assignment" "pm_access" {
   target_id   = local.account_id
   target_type = "AWS_ACCOUNT"
 }
+
+#############################################
+# ca-prod Account - 팀별 세분화 Permission Set 할당
+#
+# 콘솔에서 수동 생성된 Prod-{AI/CN/SC} 를 data source 로 참조.
+# TODO: perm set 정의 자체도 301 로 import/이관 (별도 작업)
+#############################################
+
+data "aws_ssoadmin_permission_set" "prod_ai" {
+  instance_arn = local.sso_instance_arn
+  name         = "Prod-AI"
+}
+
+data "aws_ssoadmin_permission_set" "prod_cn" {
+  instance_arn = local.sso_instance_arn
+  name         = "Prod-CN"
+}
+
+data "aws_ssoadmin_permission_set" "prod_sc" {
+  instance_arn = local.sso_instance_arn
+  name         = "Prod-SC"
+}
+
+# AI 그룹 → Prod-AI
+resource "aws_ssoadmin_account_assignment" "ai_prod_ai" {
+  instance_arn       = local.sso_instance_arn
+  permission_set_arn = data.aws_ssoadmin_permission_set.prod_ai.arn
+
+  principal_id   = aws_identitystore_group.ai.group_id
+  principal_type = "GROUP"
+
+  target_id   = var.prod_account_id
+  target_type = "AWS_ACCOUNT"
+}
+
+# CN 그룹 → Prod-CN
+resource "aws_ssoadmin_account_assignment" "cn_prod_cn" {
+  instance_arn       = local.sso_instance_arn
+  permission_set_arn = data.aws_ssoadmin_permission_set.prod_cn.arn
+
+  principal_id   = aws_identitystore_group.cn.group_id
+  principal_type = "GROUP"
+
+  target_id   = var.prod_account_id
+  target_type = "AWS_ACCOUNT"
+}
+
+# SC 그룹 → Prod-SC
+resource "aws_ssoadmin_account_assignment" "sc_prod_sc" {
+  instance_arn       = local.sso_instance_arn
+  permission_set_arn = data.aws_ssoadmin_permission_set.prod_sc.arn
+
+  principal_id   = aws_identitystore_group.sc.group_id
+  principal_type = "GROUP"
+
+  target_id   = var.prod_account_id
+  target_type = "AWS_ACCOUNT"
+}

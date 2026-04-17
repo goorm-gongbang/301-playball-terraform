@@ -46,7 +46,7 @@ variable "security_environments" {
 }
 
 variable "prod_account_id" {
-  description = "Production account ID"
+  description = "Production account ID (신규 ca-prod 전용 계정)"
   type        = string
-  default     = "406223549139"
+  default     = "990521646433"
 }

@@ -281,9 +281,10 @@ resource "aws_secretsmanager_secret_version" "ai_service_common" {
     pg_dbname        = "ai_defense"
     ch_user          = "default"
     ch_password      = ""
-    AUTH_GUARD_URL   = "http://auth-guard.prod-webs.svc.cluster.local:8080/auth"
-    INTERNAL_API_KEY = ""
-    TM_ROLLOUT_SALT  = "CHANGE_ME_IN_CONSOLE"
+    AUTH_GUARD_URL          = "http://auth-guard.prod-webs.svc.cluster.local:8080/auth"
+    INTERNAL_API_KEY        = ""
+    TM_ROLLOUT_SALT         = "CHANGE_ME_IN_CONSOLE"
+    TM_OFFLINE_LLM_API_KEY  = "CHANGE_ME_IN_CONSOLE"
   })
 
   lifecycle { ignore_changes = [secret_string] }

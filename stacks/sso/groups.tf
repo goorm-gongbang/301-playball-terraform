@@ -32,6 +32,18 @@ resource "aws_identitystore_group" "pm" {
   description       = "기획팀 - Project Manager 권한"
 }
 
+resource "aws_identitystore_group" "ai" {
+  identity_store_id = local.identity_store_id
+  display_name      = "AI"
+  description       = "AI팀 - AI/ML 워크로드 권한"
+}
+
+resource "aws_identitystore_group" "pen" {
+  identity_store_id = local.identity_store_id
+  display_name      = "PEN"
+  description       = "침투테스트팀 - Pentest/Security 감사 권한"
+}
+
 #############################################
 # Group ID Outputs (for assignments)
 #############################################
@@ -43,5 +55,7 @@ locals {
     SC  = aws_identitystore_group.sc.group_id
     FE  = aws_identitystore_group.fe.group_id
     PM  = aws_identitystore_group.pm.group_id
+    AI  = aws_identitystore_group.ai.group_id
+    PEN = aws_identitystore_group.pen.group_id
   }
 }
