@@ -49,7 +49,7 @@ data "aws_ssoadmin_permission_set" "admin_full" {
 
 resource "aws_ssoadmin_permission_set" "dev_cn" {
   name             = "Dev-CN"
-  description      = "DevOps Full Access for Dev environment"
+  description      = "CN team access on Management account - ECR and shared infra"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "dev", Role = "cn" }
@@ -63,7 +63,7 @@ resource "aws_ssoadmin_managed_policy_attachment" "dev_cn_admin" {
 
 resource "aws_ssoadmin_permission_set" "staging_cn" {
   name             = "Staging-CN"
-  description      = "DevOps Full Access for Staging environment"
+  description      = "staging CN - kubectl full, S3 full, Secrets read/write"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "staging", Role = "cn" }
@@ -77,7 +77,7 @@ resource "aws_ssoadmin_managed_policy_attachment" "staging_cn_admin" {
 
 resource "aws_ssoadmin_permission_set" "prod_cn" {
   name             = "Prod-CN"
-  description      = "DevOps Full Access for Prod environment"
+  description      = "prod CN - kubectl full, S3 full, Secrets read-only"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "prod", Role = "cn" }
@@ -95,7 +95,7 @@ resource "aws_ssoadmin_managed_policy_attachment" "prod_cn_admin" {
 
 resource "aws_ssoadmin_permission_set" "staging_dev" {
   name             = "Staging-Dev"
-  description      = "Developer permissions for Staging environment"
+  description      = "staging Developer - SSM, Grafana, ArgoCD, S3/Secrets read-only"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "staging", Role = "dev" }
@@ -174,7 +174,7 @@ resource "aws_ssoadmin_permission_set_inline_policy" "staging_dev" {
 
 resource "aws_ssoadmin_permission_set" "prod_dev" {
   name             = "Prod-Dev"
-  description      = "Developer permissions for Prod environment (read-only)"
+  description      = "prod Developer - SSM, Grafana, ArgoCD, S3/Secrets read-only"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "prod", Role = "dev" }
@@ -245,7 +245,7 @@ resource "aws_ssoadmin_permission_set_inline_policy" "prod_dev" {
 
 resource "aws_ssoadmin_permission_set" "staging_sc" {
   name             = "Staging-SC"
-  description      = "Security permissions for Staging environment"
+  description      = "staging Security - Secrets management, CloudTrail, GuardDuty, Security Hub"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "staging", Role = "sc" }
@@ -300,7 +300,7 @@ resource "aws_ssoadmin_permission_set_inline_policy" "staging_sc" {
 
 resource "aws_ssoadmin_permission_set" "prod_sc" {
   name             = "Prod-SC"
-  description      = "Security permissions for Prod environment"
+  description      = "prod Security - Secrets management, CloudTrail, GuardDuty, Security Hub"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "prod", Role = "sc" }
@@ -359,7 +359,7 @@ resource "aws_ssoadmin_permission_set_inline_policy" "prod_sc" {
 
 resource "aws_ssoadmin_permission_set" "staging_ai" {
   name             = "Staging-AI"
-  description      = "AI team permissions for Staging environment"
+  description      = "staging AI - SSM, Grafana, ArgoCD, AI S3/Secrets read-only"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "staging", Role = "ai" }
@@ -414,7 +414,7 @@ resource "aws_ssoadmin_permission_set_inline_policy" "staging_ai" {
 
 resource "aws_ssoadmin_permission_set" "prod_ai" {
   name             = "Prod-AI"
-  description      = "AI team permissions for Prod environment"
+  description      = "prod AI - SSM, Grafana, ArgoCD, AI S3/Secrets read-only"
   instance_arn     = local.sso_instance_arn
   session_duration = "PT8H"
   tags = { Environment = "prod", Role = "ai" }
