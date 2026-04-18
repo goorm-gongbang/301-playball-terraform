@@ -139,6 +139,8 @@ module "rds" {
 
   engine_version        = local.config.rds.engine_version
   instance_class        = local.config.rds.instance_class
+  db_name               = lookup(local.config.rds, "db_name", "goormgb")
+  db_username           = lookup(local.config.rds, "db_username", "goormgb_admin")
   allocated_storage     = local.config.rds.allocated_storage
   max_allocated_storage = local.config.rds.max_allocated_storage
   multi_az              = local.config.rds.multi_az
@@ -192,7 +194,7 @@ module "ops_alerting" {
   alarms_enabled         = lookup(local.config, "ops_alerting_enabled", true)
 
   rds_instance_identifier = module.rds.identifier
-  backup_s3_bucket        = "playball-web-backup"
+  backup_s3_bucket        = "playball-prod-backup"
 
   depends_on = [module.elasticache, module.rds]
 }

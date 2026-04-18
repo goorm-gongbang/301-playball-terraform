@@ -17,7 +17,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
+    bucket       = "playball-prod-tfstate"
     key          = "prod/terraform.tfstate"
     region       = "ap-northeast-2"
     encrypt      = true
@@ -45,7 +45,7 @@ provider "aws" {
       Environment = local.config.environment
       ManagedBy   = "terraform"
       Owner       = local.config.owner_name
-      Project     = "goormgb-${local.config.environment}"
+      Project     = "playball-${local.config.environment}"
     }
   }
 }

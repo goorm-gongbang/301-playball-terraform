@@ -22,7 +22,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "goormgb"
+      Project     = "playball"
       ManagedBy   = "terraform"
       Environment = "prod"
     }
