@@ -1,7 +1,3 @@
-#############################################
-# Prod S3 Stack
-#############################################
-
 terraform {
   required_version = ">= 1.0"
 
@@ -13,8 +9,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-prod-tfstate"
-    key          = "prod/s3/terraform.tfstate"
+    bucket       = "playball-tfstate"
+    key          = "staging/stacks/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
@@ -28,8 +24,7 @@ provider "aws" {
     tags = {
       Project     = "goormgb"
       ManagedBy   = "terraform"
-      Environment = "prod"
-      Layer       = "s3"
+      Environment = "staging"
     }
   }
 }

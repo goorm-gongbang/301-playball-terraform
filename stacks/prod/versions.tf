@@ -1,7 +1,3 @@
-#############################################
-# Staging Secrets Stack
-#############################################
-
 terraform {
   required_version = ">= 1.0"
 
@@ -13,8 +9,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
-    key          = "staging/secrets/terraform.tfstate"
+    bucket       = "playball-prod-tfstate"
+    key          = "prod/stacks/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
@@ -28,8 +24,7 @@ provider "aws" {
     tags = {
       Project     = "goormgb"
       ManagedBy   = "terraform"
-      Environment = "staging"
-      Layer       = "secrets"
+      Environment = "prod"
     }
   }
 }

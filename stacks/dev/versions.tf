@@ -1,7 +1,3 @@
-#############################################
-# Staging S3 Stack
-#############################################
-
 terraform {
   required_version = ">= 1.0"
 
@@ -13,23 +9,24 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
-    key          = "staging/s3/terraform.tfstate"
+    bucket       = "goormgb-tf-state"
+    key          = "dev/stacks/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
+    profile      = "wonny"
   }
 }
 
 provider "aws" {
-  region = "ap-northeast-2"
+  region  = "ap-northeast-2"
+  profile = "wonny"
 
   default_tags {
     tags = {
       Project     = "goormgb"
       ManagedBy   = "terraform"
-      Environment = "staging"
-      Layer       = "s3"
+      Environment = "dev"
     }
   }
 }

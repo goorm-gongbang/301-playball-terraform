@@ -1,3 +1,0 @@
-monitoring_secret_name = "prod/monitoring"
-critical_mention_text  = "@개발팀 @admins"
-cluster_name           = "goormgb-prod-eks"
