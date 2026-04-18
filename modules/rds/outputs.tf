@@ -38,6 +38,20 @@ output "security_group_id" {
 }
 
 #############################################
+# Read Replica
+#############################################
+
+output "read_replica_address" {
+  description = "Read replica address (hostname only)"
+  value       = var.read_replica_enabled ? aws_db_instance.read_replica[0].address : null
+}
+
+output "read_replica_endpoint" {
+  description = "Read replica endpoint"
+  value       = var.read_replica_enabled ? aws_db_instance.read_replica[0].endpoint : null
+}
+
+#############################################
 # Secrets Manager
 #############################################
 

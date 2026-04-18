@@ -18,7 +18,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
+    bucket       = "playball-prod-tfstate"
     key          = "cdn/prod/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true

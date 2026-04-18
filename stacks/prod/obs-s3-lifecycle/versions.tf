@@ -1,5 +1,7 @@
 #############################################
-# S3 Stack - Terraform Configuration
+# Observability S3 & Lifecycle Stack
+# - Loki / Tempo / Thanos S3 buckets (staging + prod)
+# - S3 lifecycle policies (expiration, GLACIER transition)
 #############################################
 
 terraform {
@@ -13,8 +15,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
-    key          = "common/s3/terraform.tfstate"
+    bucket       = "playball-prod-tfstate"
+    key          = "prod/obs-s3-lifecycle/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
@@ -28,9 +30,7 @@ provider "aws" {
     tags = {
       Project   = "goormgb"
       ManagedBy = "terraform"
-      Layer     = "common"
+      Layer     = "observability"
     }
   }
 }
-
-data "aws_caller_identity" "current" {}

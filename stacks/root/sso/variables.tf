@@ -45,8 +45,14 @@ variable "security_environments" {
   default     = ["prod"]
 }
 
+variable "staging_account_id" {
+  description = "Staging account ID (ca-staging)"
+  type        = string
+  default     = "406223549139"
+}
+
 variable "prod_account_id" {
-  description = "Production account ID (신규 ca-prod 전용 계정)"
+  description = "Production account ID (ca-prod)"
   type        = string
   default     = "990521646433"
 }

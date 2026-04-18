@@ -7,7 +7,7 @@
 #############################################
 
 #############################################
-# Main Account (406223549139) - Dev, Staging
+# Main Account (497012402578) - Dev
 #############################################
 
 # CN 그룹 → DevOps-Dev
@@ -22,6 +22,10 @@ resource "aws_ssoadmin_account_assignment" "cn_devops_dev" {
   target_type = "AWS_ACCOUNT"
 }
 
+#############################################
+# Staging Account (406223549139)
+#############################################
+
 # CN 그룹 → DevOps-Staging
 resource "aws_ssoadmin_account_assignment" "cn_devops_staging" {
   instance_arn       = local.sso_instance_arn
@@ -30,7 +34,7 @@ resource "aws_ssoadmin_account_assignment" "cn_devops_staging" {
   principal_id   = aws_identitystore_group.cn.group_id
   principal_type = "GROUP"
 
-  target_id   = local.account_id
+  target_id   = var.staging_account_id
   target_type = "AWS_ACCOUNT"
 }
 
@@ -42,12 +46,12 @@ resource "aws_ssoadmin_account_assignment" "dev_developer_staging" {
   principal_id   = aws_identitystore_group.dev.group_id
   principal_type = "GROUP"
 
-  target_id   = local.account_id
+  target_id   = var.staging_account_id
   target_type = "AWS_ACCOUNT"
 }
 
 #############################################
-# Prod Account (406223549139)
+# Prod Account (990521646433)
 #############################################
 
 # CN 그룹 → DevOps-Prod

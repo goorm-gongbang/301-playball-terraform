@@ -1,6 +1,5 @@
 #############################################
-# Secrets Stack - Terraform Configuration
-# 인프라 재생성과 무관한 고정 시크릿 관리
+# Prod S3 Stack
 #############################################
 
 terraform {
@@ -14,8 +13,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
-    key          = "common/secrets/terraform.tfstate"
+    bucket       = "playball-prod-tfstate"
+    key          = "prod/s3/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
@@ -27,9 +26,10 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project   = "goormgb"
-      ManagedBy = "terraform"
-      Layer     = "secrets"
+      Project     = "goormgb"
+      ManagedBy   = "terraform"
+      Environment = "prod"
+      Layer       = "s3"
     }
   }
 }

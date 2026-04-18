@@ -120,6 +120,18 @@ variable "max_connections" {
   default     = 100
 }
 
+variable "read_replica_enabled" {
+  description = "Enable read replica"
+  type        = bool
+  default     = false
+}
+
+variable "read_replica_instance_class" {
+  description = "Instance class for read replica (defaults to same as primary)"
+  type        = string
+  default     = ""
+}
+
 #############################################
 # Local - Name Prefix & Slug
 #############################################

@@ -148,6 +148,9 @@ module "rds" {
   monitoring_interval    = lookup(local.config.rds, "monitoring_interval", 0)
   max_connections        = lookup(local.config.rds, "max_connections", 100)
 
+  # Read Replica
+  read_replica_enabled = lookup(local.config.rds, "read_replica", false)
+
   # Bastion에서 RDS 접근 허용
   bastion_security_group_id = module.bastion.security_group_id
 

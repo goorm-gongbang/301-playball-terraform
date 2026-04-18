@@ -191,6 +191,37 @@ resource "aws_db_instance" "main" {
 }
 
 #############################################
+# Read Replica
+#############################################
+
+resource "aws_db_instance" "read_replica" {
+  count = var.read_replica_enabled ? 1 : 0
+
+  identifier          = "${local.name_slug}-postgresql-replica"
+  replicate_source_db = aws_db_instance.main.identifier
+
+  instance_class    = var.read_replica_instance_class != "" ? var.read_replica_instance_class : var.instance_class
+  storage_encrypted = true
+
+  vpc_security_group_ids = [aws_security_group.rds.id]
+  publicly_accessible    = false
+
+  parameter_group_name = aws_db_parameter_group.main.name
+
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 7
+
+  monitoring_interval = var.monitoring_interval
+  monitoring_role_arn = var.monitoring_interval > 0 ? aws_iam_role.rds_monitoring[0].arn : null
+
+  skip_final_snapshot = true
+
+  tags = {
+    Name = "${local.name_prefix}-postgresql-replica"
+  }
+}
+
+#############################################
 # Enhanced Monitoring IAM Role
 #############################################
 
