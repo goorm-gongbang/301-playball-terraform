@@ -63,6 +63,7 @@ module "eks" {
   infra_min_size       = local.config.eks.node_groups.infra.min_size
   infra_max_size       = local.config.eks.node_groups.infra.max_size
   infra_desired_size   = local.config.eks.node_groups.infra.desired_size
+  infra_subnet_ids     = [module.vpc.private_subnet_ids[1]]  # ap-northeast-2c 고정 (stateful PV)
 
   # Node Group - Apps
   apps_instance_types = local.config.eks.node_groups.apps.instance_types

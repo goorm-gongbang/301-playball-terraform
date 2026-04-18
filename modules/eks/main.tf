@@ -276,7 +276,7 @@ resource "aws_eks_node_group" "infra" {
   # flap 거의 없음. 교체가 꼭 필요한 순간에만 수동 조치 (prefix 미전환 유지).
   node_group_name = var.owner_name != "" ? "${var.owner_name}-infra-ng" : "infra-ng"
   node_role_arn   = aws_iam_role.node_infra.arn
-  subnet_ids      = var.private_subnet_ids
+  subnet_ids      = length(var.infra_subnet_ids) > 0 ? var.infra_subnet_ids : var.private_subnet_ids
 
   ami_type       = "AL2023_ARM_64_STANDARD"
   instance_types = var.infra_instance_types

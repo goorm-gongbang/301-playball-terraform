@@ -138,6 +138,12 @@ variable "infra_desired_size" {
   default     = 1
 }
 
+variable "infra_subnet_ids" {
+  description = "Subnet IDs for infra node group (defaults to private_subnet_ids if empty). Pin to single AZ for stateful workloads."
+  type        = list(string)
+  default     = []
+}
+
 #############################################
 # Node Group Variables - Apps (on-demand, app workloads)
 #############################################
