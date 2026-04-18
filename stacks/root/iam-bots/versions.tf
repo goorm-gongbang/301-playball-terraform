@@ -14,8 +14,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "playball-tfstate"
-    key          = "common/iam-bots/terraform.tfstate"
+    bucket       = "goormgb-tf-state"
+    key          = "root/iam-bots/terraform.tfstate"
     region       = "ap-northeast-2"
     use_lockfile = true
     encrypt      = true
