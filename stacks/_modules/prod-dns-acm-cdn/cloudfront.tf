@@ -9,9 +9,18 @@ resource "aws_cloudfront_distribution" "api" {
   price_class     = "PriceClass_200"
   is_ipv6_enabled = true
 
+  # WAF 연결 (us-east-1에서 생성된 WAF WebACL)
+  web_acl_id = aws_wafv2_web_acl.api.arn
+
   origin {
     domain_name = var.alb_dns
     origin_id   = "api-alb"
+
+    # ALB 직접 접근 방지: 이 헤더 없으면 ALB에서 거부
+    custom_header {
+      name  = "X-Origin-Verify"
+      value = var.origin_verify_secret
+    }
 
     custom_origin_config {
       http_port              = 80

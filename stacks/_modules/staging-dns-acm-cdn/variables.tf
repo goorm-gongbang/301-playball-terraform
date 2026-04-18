@@ -21,3 +21,10 @@ variable "realtime_log_config_arn" {
   type        = string
   default     = null
 }
+
+variable "origin_verify_secret" {
+  description = "CloudFront → ALB 커스텀 헤더 비밀값 (ALB에서 검증)"
+  type        = string
+  sensitive   = true
+  default     = "playball-staging-origin-verify-2026"
+}
