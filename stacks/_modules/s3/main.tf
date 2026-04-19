@@ -85,6 +85,20 @@ resource "aws_s3_bucket" "ai_audit" {
   tags   = { Name = "${local.prefix}-ai-audit", Purpose = "ai-defense-audit" }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "ai_audit" {
+  count  = var.enable_ai_audit_bucket ? 1 : 0
+  bucket = aws_s3_bucket.ai_audit[0].id
+
+  rule {
+    id     = "expiry-7days"
+    status = "Enabled"
+
+    expiration {
+      days = 7
+    }
+  }
+}
+
 #############################################
 # Backup Bucket
 #############################################
