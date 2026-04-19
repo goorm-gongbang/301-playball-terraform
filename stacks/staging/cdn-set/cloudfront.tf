@@ -9,8 +9,8 @@ resource "aws_cloudfront_distribution" "api" {
   price_class     = "PriceClass_200"
   is_ipv6_enabled = true
 
-  # WAF 연결 (us-east-1에서 생성된 WAF WebACL)
-  web_acl_id = aws_wafv2_web_acl.api.arn
+  # TODO: WAF 연결 (부하테스트 중 비활성화)
+  # web_acl_id = aws_wafv2_web_acl.api.arn
 
   origin {
     domain_name = var.alb_dns
