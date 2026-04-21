@@ -15,6 +15,9 @@ override.tf.json
 terraform.tfvars
 *.auto.tfvars
 
+# Environment config files (contain sensitive values - use config.yaml.example instead)
+config.yaml
+
 # Lambda build artifacts
 *.zip
 
